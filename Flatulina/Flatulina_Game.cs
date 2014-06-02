@@ -46,7 +46,7 @@ namespace Flatulina
         {
             // TODO: Add your initialization logic here
 
-            player = new Player(Content.Load<Texture2D>("Player/cherub-flying-arms"), 64, 64, new Vector2(0, 300));
+            player = new Player(Content.Load<Texture2D>("Player/cherub-flying-arms"), 64, 64, new Vector2(0, 0));
 
             base.Initialize();
         }
@@ -89,7 +89,10 @@ namespace Flatulina
             // TODO: Add your update logic here
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            player.CheckInput(deltaTime);
+           
+            //player.CheckInput(deltaTime);
+            //player.Gravity(deltaTime);
+            player.Update(deltaTime);
 
             base.Update(gameTime);
         }

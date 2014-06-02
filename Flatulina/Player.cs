@@ -13,10 +13,26 @@ namespace Flatulina
 {
     public class Player
     {
+        // general object data
         public Texture2D sprite;
         public int width, height;
-        public Vector2 pos, vel;
-        public float maxSpeed, accel, friction;
+        public Vector2 pos;
+
+        // movement
+        public Vector2 vel;
+        public float maxSpeed, accel, friction; 
+            
+        // jumping
+        public float jumpVel;
+
+        // gravity
+        public bool useGravity;
+        public float gravityAccel, terminalVel;
+
+        // player states
+        public enum player_state {ON_GROUND,JUMPING,FALLING };
+
+        public player_state state;
 
         public Player()
         {
@@ -24,9 +40,14 @@ namespace Flatulina
             width = 0;
             height = 0;
             pos = new Vector2(0f, 0f);
+
             maxSpeed = 0;
             accel = 0;
             friction = 0;
+            gravityAccel = 0;
+            terminalVel = 0;
+
+            
 
         }
         public Player(Texture2D newSprite, int newWidth, int newHeight, Vector2 newPos)
@@ -35,11 +56,19 @@ namespace Flatulina
             width = newWidth;
             height = newHeight;
             pos = newPos;
-            maxSpeed = 5f;
+            maxSpeed = 4f;
             accel = 10f;
-            friction = 0.2f;
+            friction = 0.15f;
+            gravityAccel = 12f;
+            terminalVel = 25f;
+            jumpVel = 5f;
+
+            state = player_state.ON_GROUND;
         }
         ~Player() { }
+
+        
+
 
 
         public void MoveSprite(Vector2 newPos)
@@ -52,8 +81,7 @@ namespace Flatulina
         {
             KeyboardState state = Keyboard.GetState();
 
-            pos = vel + pos;
-
+            pos.X = vel.X + pos.X;
 
             if (state.IsKeyDown(Keys.Left))
             {
@@ -75,7 +103,53 @@ namespace Flatulina
             {
                 Vector2 i = vel;
                 vel.X = (i.X -= friction * i.X);
-                vel.Y = (i.Y -= friction * i.Y);
+            }
+
+            
+
+        }
+        public void Gravity(float deltaTime)
+        {
+            pos.Y = vel.Y + pos.Y;
+
+
+            vel.Y = vel.Y + gravityAccel * deltaTime;
+            if (vel.Y > terminalVel)
+                vel.Y = terminalVel;
+            if (pos.Y > 300)
+                pos.Y = 300;
+        }
+
+        public void On_Ground(float deltaTime)
+        {
+        }
+
+        public void Jumping(float deltaTime) 
+        {
+        }
+
+        public void Falling(float deltaTime) 
+        {
+        }
+
+        public void Update(float deltaTime)
+        {
+            CheckInput(deltaTime);
+            Gravity(deltaTime);
+
+            switch (state)
+            {
+                case player_state.ON_GROUND:
+                    On_Ground(deltaTime);
+                    break;
+                case player_state.JUMPING:
+                    Jumping(deltaTime);
+                    break;
+                case player_state.FALLING:
+                    Falling(deltaTime);
+                    break;
+                default:
+                    break;
             }
         }
     }

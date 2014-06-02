@@ -14,16 +14,24 @@ namespace Flatulina
     /// <summary>
     /// This is the main type for your game
     /// </summary>
+    /// 
+
+    
+
+
+
     public class Flatulina_Game : Game
     {
+        Player player;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
-        private Texture2D flatulina;
+        
+        //private Texture2D flatulina;
 
         public Flatulina_Game()
             : base()
         {
+            
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -38,6 +46,8 @@ namespace Flatulina
         {
             // TODO: Add your initialization logic here
 
+            player = new Player(Content.Load<Texture2D>("Player/cherub-flying-arms"), 64, 64, new Vector2(0, 300));
+
             base.Initialize();
         }
 
@@ -50,8 +60,11 @@ namespace Flatulina
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            //player.sprite = Content.Load<Texture2D>("Player/cherub-flying-arms");
+
             // TODO: use this.Content to load your game content here
-            flatulina = Content.Load<Texture2D>("cherub-flying-arms");
+            //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
+
         }
 
         /// <summary>
@@ -74,6 +87,9 @@ namespace Flatulina
                 Exit();
 
             // TODO: Add your update logic here
+            var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            player.CheckInput(deltaTime);
 
             base.Update(gameTime);
         }
@@ -89,7 +105,7 @@ namespace Flatulina
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
+            spriteBatch.Draw(player.sprite, new Rectangle((int)player.pos.X, (int)player.pos.Y, 128, 128), Color.White);
 
             spriteBatch.End();
 

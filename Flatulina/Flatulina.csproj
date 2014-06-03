@@ -36,10 +36,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
+    <Compile Include="EnvironmentSolid.cs" />
     <Compile Include="Flatulina_Game.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
@@ -55,6 +57,10 @@
   <ItemGroup>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\cherub-flying-arms.xnb">
       <Link>Content\Graphics\cherub-flying-arms.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\Courier New.xnb">
+      <Link>Content\Graphics\Courier New.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\floor.xnb">

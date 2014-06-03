@@ -19,8 +19,12 @@ namespace Flatulina
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private Texture2D flatulina;
 
+        Sprite flatulina = new Sprite(50, 50, 0.2f);
+        Sprite background = new Sprite(1280, 1080, 1.2f); 
+     
+        
+       
         public Flatulina_Game()
             : base()
         {
@@ -39,6 +43,8 @@ namespace Flatulina
             // TODO: Add your initialization logic here
 
             base.Initialize();
+            graphics.PreferredBackBufferWidth = 1280; //set screen X
+            graphics.PreferredBackBufferHeight = 1080; // set screen Y
         }
 
         /// <summary>
@@ -51,7 +57,8 @@ namespace Flatulina
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            flatulina = Content.Load<Texture2D>("cherub-flying-arms");
+            flatulina.tex = Content.Load<Texture2D>("Player/cherub-flying-arms");
+            background.tex = Content.Load<Texture2D>("Player/dragon_tower_by_bodin85-d4jn22p");
         }
 
         /// <summary>
@@ -73,6 +80,9 @@ namespace Flatulina
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            Vector2 oldPos = new Vector2(flatulina.Position.X, flatulina.Position.Y);
+
+            flatulina.Update();
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -89,7 +99,8 @@ namespace Flatulina
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
+            background.Draw(spriteBatch);
+            flatulina.Draw(spriteBatch); 
 
             spriteBatch.End();
 

@@ -23,16 +23,17 @@ namespace Flatulina
         public float maxSpeed, accel, friction; 
             
         // jumping
+        public bool hasJumped;
         public float jumpVel;
 
         // gravity
         public bool useGravity;
-        public float gravityAccel, terminalVel;
+        public float gravityAccel, dampen, terminalVel;
 
         // player states
         public enum player_state {ON_GROUND,JUMPING,FALLING };
+        public player_state playerState;
 
-        public player_state state;
 
         public Player()
         {
@@ -59,15 +60,15 @@ namespace Flatulina
             maxSpeed = 4f;
             accel = 10f;
             friction = 0.15f;
-            gravityAccel = 12f;
-            terminalVel = 25f;
-            jumpVel = 5f;
+            gravityAccel = 20f;
+            terminalVel = 30f;
+            dampen = 0.08f;
+            jumpVel = 12f;
+            hasJumped = true;
 
-            state = player_state.ON_GROUND;
+            playerState = player_state.ON_GROUND;
         }
         ~Player() { }
-
-        
 
 
 
@@ -75,21 +76,23 @@ namespace Flatulina
         {
             pos = newPos;
         }
-
-        // Movement (goes in update loop) //
+        
+        // check keyboard input
         public void CheckInput(float deltaTime)
         {
             KeyboardState state = Keyboard.GetState();
-
+            
+            // apply velocity to position
             pos.X = vel.X + pos.X;
 
+
+            // CHECK ARROWS AND APPLY VELOCITY
             if (state.IsKeyDown(Keys.Left))
             {
                 // not sure of better way yet //
                 vel.X -= accel * deltaTime;
                 if (vel.X < -maxSpeed)
                     vel.X = -maxSpeed;
-
             }
             else if (state.IsKeyDown(Keys.Right))
             {
@@ -105,12 +108,33 @@ namespace Flatulina
                 vel.X = (i.X -= friction * i.X);
             }
 
+            // check space (ONLY ON_GROUND)
+            if (playerState == player_state.ON_GROUND)
+            {
+                vel.Y = 0;
+                if (state.IsKeyDown(Keys.Space) && playerState == player_state.ON_GROUND)
+                {
+                    playerState = player_state.JUMPING;
+                }
+            }
             
-
         }
+        // check floor position
+        public void CheckFloor()
+        {
+            if (pos.Y + height < 300)
+                playerState = player_state.FALLING;
+            else
+            {
+                playerState = player_state.ON_GROUND;
+                hasJumped = false;
+            }
+        }
+        // stuffz
         public void Gravity(float deltaTime)
         {
             pos.Y = vel.Y + pos.Y;
+
 
 
             vel.Y = vel.Y + gravityAccel * deltaTime;
@@ -119,38 +143,60 @@ namespace Flatulina
             if (pos.Y > 300)
                 pos.Y = 300;
         }
-
-        public void On_Ground(float deltaTime)
+        // moar stuffz
+        public void Jump(float deltaTime)
         {
+            pos.Y = vel.Y + pos.Y;
+
+            if (!hasJumped)
+            {
+                hasJumped = true;
+                vel.Y = -jumpVel;
+            }
+
+            //pos.Y -= jumpVel * deltaTime;
+            //vel.Y = -jumpVel * deltaTime;
+            if (vel.Y != 0)
+            {
+                Vector2 i = vel;
+                vel.Y = (i.Y -= dampen * i.Y);
+                Console.WriteLine(vel.Y);
+                if (vel.Y > -1f && vel.Y < 1f)
+                {
+                    vel.Y = 0;
+                    playerState = player_state.FALLING;
+                }
+            }
+            //else
+            //{
+               // playerState = player_state.FALLING;
+            //}
+            //if(vel.Y > 50) 
+                //playerState = player_state.FALLING;
         }
 
-        public void Jumping(float deltaTime) 
-        {
-        }
-
-        public void Falling(float deltaTime) 
-        {
-        }
 
         public void Update(float deltaTime)
         {
             CheckInput(deltaTime);
-            Gravity(deltaTime);
-
-            switch (state)
+            
+            switch (playerState)
             {
                 case player_state.ON_GROUND:
-                    On_Ground(deltaTime);
+                    CheckFloor();
+                    hasJumped = false;
                     break;
                 case player_state.JUMPING:
-                    Jumping(deltaTime);
+                    Jump(deltaTime);
                     break;
                 case player_state.FALLING:
-                    Falling(deltaTime);
+                    CheckFloor();
+                    Gravity(deltaTime);
                     break;
                 default:
                     break;
             }
+            Console.WriteLine(playerState);
         }
     }
 }

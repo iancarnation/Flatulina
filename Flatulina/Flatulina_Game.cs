@@ -45,7 +45,6 @@ namespace Flatulina
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
             player = new Player(Content.Load<Texture2D>("Player/cherub-flying-arms"), 64, 64, new Vector2(0, 0));
 
             base.Initialize();
@@ -60,10 +59,7 @@ namespace Flatulina
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            //player.sprite = Content.Load<Texture2D>("Player/cherub-flying-arms");
-
             // TODO: use this.Content to load your game content here
-            //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
 
         }
 
@@ -89,9 +85,6 @@ namespace Flatulina
             // TODO: Add your update logic here
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-           
-            //player.CheckInput(deltaTime);
-            //player.Gravity(deltaTime);
             player.Update(deltaTime);
 
             base.Update(gameTime);

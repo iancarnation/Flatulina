@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flatulina", "Flatulina\Flatulina.csproj", "{B8B38142-48A6-4758-AAA7-A947E9C30649}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flatulina_Game", "Flatulina_Game\Flatulina_Game\Flatulina_Game.csproj", "{6B00B44D-DC6C-445F-871C-C10AD3C1CDC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatulinaContent", "Flatulina_Game\Flatulina_Game\FlatulinaContent.csproj", "{6B00B44D-DC6C-445F-871C-C10AD3C1CDC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatulinaContent", "Flatulina_Game\FlatulinaContent\FlatulinaContent.contentproj", "{24E9259E-E890-42D6-8564-C5A9D06263F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatulinaContentContent", "Flatulina_Game\FlatulinaContent\FlatulinaContentContent.contentproj", "{24E9259E-E890-42D6-8564-C5A9D06263F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

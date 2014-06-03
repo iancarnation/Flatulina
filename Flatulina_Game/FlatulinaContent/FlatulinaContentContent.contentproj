@@ -55,11 +55,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Player\cherub-flying-arms.png">
+    <Compile Include="Graphics\cherub-flying-arms.png">
       <Name>cherub-flying-arms</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Sound\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--

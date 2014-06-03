@@ -19,7 +19,7 @@ namespace Flatulina
         // Position of the Player relative to the upper left side of the screen
         public Vector2 Position;
 
-        public Vector2 Velocity;
+        //public Vector2 Velocity;
 
         // Area for collision detection
         public Rectangle HitBox;
@@ -42,11 +42,11 @@ namespace Flatulina
             get { return PlayerTexture.Height; }
         }
 
-        // Get top-left corner of HitBox
-        public Vector2 TopLeft { get { return new Vector2(HitBox.Top, HitBox.Left); } }
-        public Vector2 TopRight { get { return new Vector2(HitBox.Top, HitBox.Right); } }
-        public Vector2 BottomRight { get { return new Vector2(HitBox.Bottom, HitBox.Right); } }
-        public Vector2 BottomLeft { get { return new Vector2(HitBox.Bottom, HitBox.Left); } }
+        // corners of the hit box
+        public Vector2 TopLeft { get { return new Vector2(HitBox.Left, HitBox.Top); } }
+        public Vector2 TopRight { get { return new Vector2(HitBox.Right, HitBox.Top); } }
+        public Vector2 BottomRight { get { return new Vector2(HitBox.Right, HitBox.Bottom); } }
+        public Vector2 BottomLeft { get { return new Vector2(HitBox.Left, HitBox.Bottom); } }
 
         public List<Vector2> Corners { get { return new List<Vector2>() { TopLeft, TopRight, BottomRight, BottomLeft }; } }
 

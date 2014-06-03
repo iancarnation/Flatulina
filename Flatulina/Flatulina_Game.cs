@@ -46,6 +46,9 @@ namespace Flatulina
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 1024;
+            graphics.PreferredBackBufferHeight = 728;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 

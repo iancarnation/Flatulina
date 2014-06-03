@@ -53,13 +53,12 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <None Include="Content\Player\cherub-flying-arms.xnb">
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\cherub-flying-arms.xnb">
+      <Link>Content\Graphics\cherub-flying-arms.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Content\Graphics\cherub-flying-arms.xnb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="Content\Player\dragon_tower_by_bodin85-d4jn22p.xnb">
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\floor.xnb">
+      <Link>Content\Graphics\floor.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

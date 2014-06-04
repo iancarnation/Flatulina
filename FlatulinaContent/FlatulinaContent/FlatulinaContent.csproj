@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.ContentPipeline.targets" />
   <PropertyGroup>
-    <ProjectGuid>{6B00B44D-DC6C-445F-871C-C10AD3C1CDC7}</ProjectGuid>
+    <ProjectGuid>{45F7985A-E3E3-4412-AAFC-E74E595F6377}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Windows</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -16,7 +16,7 @@
     <OutputPath>bin\$(Configuration)</OutputPath>
     <XnaPlatform>Windows</XnaPlatform>
     <XnaProfile>HiDef</XnaProfile>
-    <XnaCrossPlatformGroupID>f5dc644d-3715-4373-92c0-334df60011ed</XnaCrossPlatformGroupID>
+    <XnaCrossPlatformGroupID>ca8990ae-7aa0-4fee-bb3a-74abd37176cd</XnaCrossPlatformGroupID>
     <XnaOutputType>Library</XnaOutputType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -46,8 +46,8 @@
     <Reference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameName1Content\GameName1Content.contentproj">
-      <Name>GameName1Content</Name>
+    <ProjectReference Include="..\FlatulinaContentContent\FlatulinaContentContent.contentproj">
+      <Name>FlatulinaContentContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
   </ItemGroup>

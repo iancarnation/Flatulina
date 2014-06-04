@@ -25,11 +25,12 @@ namespace Flatulina
 
         // Represents player
         Player player;
-        Player enemy;
+        //Player enemy;
 
         // Environment stuff
         List<EnvironmentSolid> collisionSolids;
         EnvironmentSolid floor;
+        EnvironmentSolid tower1;
 
         // Keyboard states used to determine key presses
         KeyboardState currentKeyboardState;
@@ -72,13 +73,15 @@ namespace Flatulina
 
             // Initialize the player class
             player = new Player();
-            enemy = new Player();
+            //enemy = new Player();
 
 
             collisionSolids = new List<EnvironmentSolid>();
             floor = new EnvironmentSolid();
+            tower1 = new EnvironmentSolid();
 
             collisionSolids.Add(floor);
+            collisionSolids.Add(tower1);
 
             base.Initialize();
         }
@@ -102,15 +105,17 @@ namespace Flatulina
             Vector2 enemyPosition = new Vector2(500, 100);
 
             player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), playerPosition);
-            enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
+            //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
             playerMoveSpeed = 8.0f;
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
-
             floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
+
+            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
 
             //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
@@ -193,10 +198,10 @@ namespace Flatulina
 
         private void UpdateCollision()
         {
-            if (player.HitBox.Intersects(enemy.HitBox))
-                player.color = Color.Red;
-            else
-                player.color = Color.White;
+            //if (player.HitBox.Intersects(enemy.HitBox))
+            //    player.color = Color.Red;
+            //else
+            //    player.color = Color.White;
 
             //// Solid Environment objects
             //if (player.HitBox.Intersects(floor.HitBox))
@@ -264,6 +269,10 @@ namespace Flatulina
             float moveOutLeft = FindDistanceToEmptySpaceAlongNegativeX(player.collidingCorner);
             float moveOutRight = FindDistanceToEmptySpaceAlongX(player.collidingCorner);
             float bestMoveOut = MathHelper.Min(Math.Abs(moveOutLeft), Math.Abs(moveOutRight));
+
+            // if we need to move left, return negative x
+            if (bestMoveOut == Math.Abs(moveOutLeft))
+                return - bestMoveOut;
 
             return bestMoveOut;
         }
@@ -406,9 +415,10 @@ namespace Flatulina
 
             // Draw Player
             player.Draw(_spriteBatch);
-            enemy.Draw(_spriteBatch);
+            //enemy.Draw(_spriteBatch);
 
-            floor.Draw(_spriteBatch);
+            for (int i = 0; i < collisionSolids.Count; i++)
+                collisionSolids[i].Draw(_spriteBatch);
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
 

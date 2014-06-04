@@ -26,12 +26,15 @@ namespace Flatulina
         public bool hasJumped;
         public float jumpVel;
 
+        // jet fart
+        public float jetVel;
+
         // gravity
         public bool useGravity;
         public float gravityAccel, dampen, terminalVel;
 
         // player states
-        public enum player_state {ON_GROUND,JUMPING,FALLING };
+        public enum player_state { ON_GROUND,JUMPING,FALLING,JET };
         public player_state playerState;
 
 
@@ -126,11 +129,12 @@ namespace Flatulina
                 playerState = player_state.FALLING;
             else
             {
+                pos.Y = 300 - height;
                 playerState = player_state.ON_GROUND;
                 hasJumped = false;
             }
         }
-        // stuffz
+
         public void Gravity(float deltaTime)
         {
             pos.Y = vel.Y + pos.Y;
@@ -143,7 +147,6 @@ namespace Flatulina
             if (pos.Y > 300)
                 pos.Y = 300;
         }
-        // moar stuffz
         public void Jump(float deltaTime)
         {
             pos.Y = vel.Y + pos.Y;
@@ -174,11 +177,40 @@ namespace Flatulina
             //if(vel.Y > 50) 
                 //playerState = player_state.FALLING;
         }
+        public void JetFart(float deltaTime)
+        {
+            pos.Y = vel.Y + pos.Y;
 
+            if (!hasJumped)
+            {
+                hasJumped = true;
+                vel.Y = -jetVel;
+            }
+
+            //pos.Y -= jumpVel * deltaTime;
+            //vel.Y = -jumpVel * deltaTime;
+            if (vel.Y != 0)
+            {
+                Vector2 i = vel;
+                vel.Y = (i.Y -= dampen * i.Y);
+                Console.WriteLine(vel.Y);
+                if (vel.Y > -1f && vel.Y < 1f)
+                {
+                    vel.Y = 0;
+                    playerState = player_state.FALLING;
+                }
+            }
+            //else
+            //{
+            // playerState = player_state.FALLING;
+            //}
+            //if(vel.Y > 50) 
+            //playerState = player_state.FALLING;
+        }
 
         public void Update(float deltaTime)
         {
-            CheckInput(deltaTime);
+            
             
             switch (playerState)
             {
@@ -197,6 +229,7 @@ namespace Flatulina
                     break;
             }
             Console.WriteLine(playerState);
-        }
+            CheckInput(deltaTime);
+        }  
     }
 }

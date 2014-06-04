@@ -163,37 +163,37 @@ namespace Flatulina
         private void UpdatePlayer(GameTime gameTime)
         {
             // Get Thumbstick Controls
-            player.Position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.Position.Y += currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
+            player.position.Y += currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
             {
-                player.Position.X -= playerMoveSpeed;
+                player.position.X -= playerMoveSpeed;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
             {
-                player.Position.X += playerMoveSpeed;
+                player.position.X += playerMoveSpeed;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W) || currentGamePadState.DPad.Up == ButtonState.Pressed)
             {
-                player.Position.Y -= playerMoveSpeed;
+                player.position.Y -= playerMoveSpeed;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S) || currentGamePadState.DPad.Down == ButtonState.Pressed)
             {
-                player.Position.Y += playerMoveSpeed;
+                player.position.Y += playerMoveSpeed;
             }
 
             // Make sure player does not go out of bounds
-            player.Position.X = MathHelper.Clamp(player.Position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
+            player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
+            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
 
             // Update HitBox
-            player.HitBox.X = (int)player.Position.X;
-            player.HitBox.Y = (int)player.Position.Y;
+            player.BoundingBox.X = (int)player.position.X;
+            player.BoundingBox.Y = (int)player.position.Y;
         }
 
         private void UpdateCollision()
@@ -227,11 +227,11 @@ namespace Flatulina
 
                 if (!xIsColliding || Math.Abs(yDistanceToResolve) < Math.Abs(xDistanceToResolve))
                 {
-                    player.Position.Y += yDistanceToResolve;
+                    player.position.Y += yDistanceToResolve;
                     break;
                 }
                 else // otherwise, resolve the collision by moving along x
-                    player.Position.X += xDistanceToResolve; break;
+                    player.position.X += xDistanceToResolve; break;
             }
 
 
@@ -243,7 +243,7 @@ namespace Flatulina
             for (int i = 0; i < collisionSolids.Count; i++)
             {
                 // if the player overlaps any environment solids, then it's colliding
-                if (player.HitBox.Intersects(collisionSolids[i].HitBox))
+                if (player.BoundingBox.Intersects(collisionSolids[i].HitBox))
                 {
                     // find one of the player's hitbox corners that is colliding
                     for (int c = 0; c < 4; c++)

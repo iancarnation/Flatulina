@@ -121,7 +121,7 @@ namespace Flatulina
             decX = 0.2f * mScale;
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
-            jetVelocityY = 24.0f * mScale;
+            jetVelocityY = 32.0f * mScale;
             // Set max velocity
             maxVelocity = new Vector2(3.0f * mScale, 12.0f * mScale);
 

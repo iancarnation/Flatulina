@@ -104,7 +104,7 @@ namespace Flatulina
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
             Vector2 enemyPosition = new Vector2(500, 100);
 
-            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), playerPosition);
+            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), new Vector2(100,200));
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
@@ -162,38 +162,54 @@ namespace Flatulina
 
         private void UpdatePlayer(GameTime gameTime)
         {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            bool moveRequest = false;
+ 
             // Get Thumbstick Controls
-            player.position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.position.Y += currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
+            player.position.Y += player.velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
             {
-                player.position.X -= playerMoveSpeed;
+                player.velocity.X -= player.accX;
+                moveRequest = true;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
             {
-                player.position.X += playerMoveSpeed;
+                player.velocity.X += player.accX;
+                moveRequest = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W) || currentGamePadState.DPad.Up == ButtonState.Pressed)
-            {
-                player.position.Y -= playerMoveSpeed;
-            }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S) || currentGamePadState.DPad.Down == ButtonState.Pressed)
+            if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
+            if (player.velocity.X < -player.maxVelocity.X) player.velocity.X = -player.maxVelocity.X;
+            if (player.velocity.Y < -player.maxVelocity.Y) player.velocity.Y = -player.maxVelocity.Y;
+
+            if (!moveRequest)
             {
-                player.position.Y += playerMoveSpeed;
+                if (player.velocity.X < 0) player.velocity.X += player.decX;
+                if (player.velocity.X > 0) player.velocity.X -= player.decX;
+                // Deceleration may produce a speed that is greater than zero but
+                // smaller than the smallest unit of deceleration. These lines ensure
+                // that the player does not keep travelling at slow speed forever after
+                // decelerating.
+                if (player.velocity.X > 0 && player.velocity.X < player.decX) player.velocity.X = 0;
+                if (player.velocity.X < 0 && player.velocity.X > -player.decX) player.velocity.X = 0;
             }
 
             // Make sure player does not go out of bounds
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
+            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - (player.Height + 200) * player.scale);
 
             // Update HitBox
             player.BoundingBox.X = (int)player.position.X;
             player.BoundingBox.Y = (int)player.position.Y;
+
+
+            // GRAVITY //
+            player.velocity.Y += player.accY;
         }
 
         private void UpdateCollision()
@@ -203,10 +219,14 @@ namespace Flatulina
             //else
             //    player.color = Color.White;
 
+
+
+            // FLOOR //
+
             //// Solid Environment objects
-            //if (player.HitBox.Intersects(floor.HitBox))
+            //if (player.BoundingBox.Intersects(floor.HitBox))
             //{
-            //    player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, floor.Position.Y - player.Height * player.scale);
+                //player.position.Y = MathHelper.Clamp(player.position.Y, 0, floor.Position.Y - player.Height * player.scale);
             //}
 
             // source: http://gamedev.stackexchange.com/questions/14486/2d-platformer-aabb-collision-problems/14491#14491

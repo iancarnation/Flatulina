@@ -35,10 +35,13 @@ namespace Flatulina
 
         // ------------ Movement Fields ------------------------
 
-        public Vector2 velocity;
+        
 
         // amount of X acceleration/deceleration to apply when player moves in X / is not moving in X
-        public float accX, decX;
+        public float accX, accY, decX;
+
+        // The amount of X and Y movement to occur on the next frame
+        public Vector2 velocity;
 
         // amount of upward force to apply when the player first presses jump
         public float jumpVelocityY; // ** maybe this becomes a Vec2? **
@@ -113,11 +116,12 @@ namespace Flatulina
             velocity = new Vector2(0.0f, 0.0f);
             // Set accel/decel
             accX = 0.2f * mScale;
+            accY = 0.4f * mScale; 
             decX = 0.3f * mScale;
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
             // Set max velocity
-            maxVelocity = new Vector2(5.0f * mScale, 10.0f * mScale);
+            maxVelocity = new Vector2(5.0f * mScale, 6.0f * mScale);
 
             // Set gravity
             gravityAccel = 0.5f * mScale;

@@ -119,9 +119,9 @@ namespace Flatulina
             accY = 0.4f * mScale; 
             decX = 0.3f * mScale;
             // Set jump velocity
-            jumpVelocityY = 8.0f * mScale;
+            jumpVelocityY = 64.0f * mScale;
             // Set max velocity
-            maxVelocity = new Vector2(5.0f * mScale, 6.0f * mScale);
+            maxVelocity = new Vector2(5.0f * mScale, 12.0f * mScale);
 
             // Set gravity
             gravityAccel = 0.5f * mScale;

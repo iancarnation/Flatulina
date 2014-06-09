@@ -182,6 +182,20 @@ namespace Flatulina
                 moveRequest = true;
             }
 
+            // JUMPING
+            if ( currentKeyboardState.IsKeyDown(Keys.Space) && !player.jumping && !player.jumpKeyDown)
+            {
+                player.jumping = true;
+                player.jumpKeyDown = true;
+                player.velocity.Y = -player.jumpVelocityY;
+            }
+            // jump key released
+            if (!currentKeyboardState.IsKeyDown(Keys.Space))
+            {
+                player.jumpKeyDown = false;
+            }
+
+
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
             if (player.velocity.X < -player.maxVelocity.X) player.velocity.X = -player.maxVelocity.X;
@@ -201,7 +215,12 @@ namespace Flatulina
 
             // Make sure player does not go out of bounds
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - (player.Height + 200) * player.scale);
+            if (player.position.Y > 450)
+            {
+                player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - (player.Height + 200) * player.scale);
+                player.jumping = false;
+            }
+            
 
             // Update HitBox
             player.BoundingBox.X = (int)player.position.X;
@@ -223,7 +242,7 @@ namespace Flatulina
 
             // FLOOR //
 
-            //// Solid Environment objects
+            // Solid Environment objects
             //if (player.BoundingBox.Intersects(floor.HitBox))
             //{
                 //player.position.Y = MathHelper.Clamp(player.position.Y, 0, floor.Position.Y - player.Height * player.scale);

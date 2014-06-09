@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.GamerServices;
 
 
 
+
 namespace Flatulina
 {
     /// <summary>
@@ -18,6 +19,8 @@ namespace Flatulina
     /// </summary>
     public class Flatulina_Game : Game
     {
+        Texture2D pixel;
+
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
 
@@ -30,7 +33,7 @@ namespace Flatulina
         // Environment stuff
         List<EnvironmentSolid> collisionSolids;
         EnvironmentSolid floor;
-        EnvironmentSolid tower1;
+        //EnvironmentSolid tower1;
 
         // Keyboard states used to determine key presses
         KeyboardState currentKeyboardState;
@@ -66,6 +69,31 @@ namespace Flatulina
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
+        /// 
+        private void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
+        {
+            // Draw top line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, rectangleToDraw.Width, thicknessOfBorder), borderColor);
+
+            // Draw left line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, thicknessOfBorder, rectangleToDraw.Height), borderColor);
+
+            // Draw right line
+            _spriteBatch.Draw(pixel, new Rectangle((rectangleToDraw.X + rectangleToDraw.Width - thicknessOfBorder),
+                                            rectangleToDraw.Y,
+                                            thicknessOfBorder,
+                                            rectangleToDraw.Height), borderColor);
+            // Draw bottom line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X,
+                                            rectangleToDraw.Y + rectangleToDraw.Height - thicknessOfBorder,
+                                            rectangleToDraw.Width,
+                                            thicknessOfBorder), borderColor);
+        }
+
+
+
+
+
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -78,10 +106,10 @@ namespace Flatulina
 
             collisionSolids = new List<EnvironmentSolid>();
             floor = new EnvironmentSolid();
-            tower1 = new EnvironmentSolid();
+            //tower1 = new EnvironmentSolid();
 
             collisionSolids.Add(floor);
-            collisionSolids.Add(tower1);
+            //collisionSolids.Add(tower1);
 
             base.Initialize();
         }
@@ -92,6 +120,9 @@ namespace Flatulina
         /// </summary>
         protected override void LoadContent()
         {
+
+            
+
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -99,6 +130,9 @@ namespace Flatulina
 
             Font1 = Content.Load<SpriteFont>("Graphics\\Courier New");
             //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
+
+            pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            pixel.SetData(new[] { Color.White }); // so that we can draw whatever color we want on top of it
 
             // Load player resources
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
@@ -114,8 +148,8 @@ namespace Flatulina
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
             floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
 
-            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
-            tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+           // Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
 
             //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
@@ -195,6 +229,21 @@ namespace Flatulina
                 player.jumpKeyDown = false;
             }
 
+            // JET FART
+            if (currentKeyboardState.IsKeyDown(Keys.Z) && !player.jet && !player.jetKeyDown && player.fuel > 0)
+            {
+                player.fuel -= 1;
+                player.jet = true;
+                player.jetKeyDown = true;
+                player.velocity.Y = -player.jetVelocityY;
+            }
+            // jet key released
+            if (!currentKeyboardState.IsKeyDown(Keys.Z))
+            {
+                player.jetKeyDown = false;
+            }
+
+
 
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
@@ -214,11 +263,13 @@ namespace Flatulina
             }
 
             // Make sure player does not go out of bounds
+            // Temporary fix until dinal collision is added
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            if (player.position.Y > 450)
+            if (player.position.Y > 540)
             {
-                player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - (player.Height + 200) * player.scale);
+                player.position.Y = MathHelper.Clamp(player.position.Y, 0, 540/*GraphicsDevice.Viewport.Height - (player.Height + 350) * player.scale*/);
                 player.jumping = false;
+                player.jet = false;
             }
             
 
@@ -229,6 +280,12 @@ namespace Flatulina
 
             // GRAVITY //
             player.velocity.Y += player.accY;
+
+            //Console.WriteLine(player.jumping.ToString());
+
+
+            // UPDATE FUEL HUD
+            player.fuelFill.Width = player.fuel * 25;
         }
 
         private void UpdateCollision()
@@ -454,6 +511,8 @@ namespace Flatulina
 
             // Draw Player
             player.Draw(_spriteBatch);
+            _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);
+            DrawBorder(player.fuelOutline, 2, Color.White); 
             //enemy.Draw(_spriteBatch);
 
             for (int i = 0; i < collisionSolids.Count; i++)

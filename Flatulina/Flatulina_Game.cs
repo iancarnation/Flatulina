@@ -102,9 +102,9 @@ namespace Flatulina
 
             // Load player resources
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
-            Vector2 enemyPosition = new Vector2(500, 100);
+            // Vector2 enemyPosition = new Vector2(500, 100);
 
-            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), playerPosition);
+            player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
@@ -191,9 +191,13 @@ namespace Flatulina
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
             player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
 
-            // Update HitBox
-            player.BoundingBox.X = (int)player.position.X;
-            player.BoundingBox.Y = (int)player.position.Y;
+            // Update Bounding Box and Collision Areas
+            player.BoundingBox.Position = player.position;
+
+            player.Head.Position = new Vector2(player.position.X + player.thirdOfWidth, player.position.Y);
+            player.Feet.Position = new Vector2(player.position.X + player.thirdOfWidth, player.position.Y + player.quarterOfHeight * 3f);
+            player.Left.Position = new Vector2(player.position.X, player.position.Y + player.quarterOfHeight);
+            player.Right.Position = new Vector2(player.position.X + player.halfOfWidth, player.position.Y + player.quarterOfHeight);
         }
 
         private void UpdateCollision()

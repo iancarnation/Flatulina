@@ -14,7 +14,7 @@ namespace Flatulina
         public Vector2 Position;
 
         // Area for collision detection
-        public Rectangle HitBox;
+        public BoundingRect HitBox;
 
         // bool for going through bottom?
 
@@ -28,11 +28,11 @@ namespace Flatulina
             get { return EnvTexture.Height; }
         }
 
-        public void Initialize(Texture2D texture, Vector2 position)
+        public void Initialize(Texture2D a_texture, Vector2 a_position)
         {
-            EnvTexture = texture;
-            Position = position;
-            HitBox = new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
+            EnvTexture = a_texture;
+            Position = a_position;
+            HitBox = new BoundingRect(Position.X, Position.Y, Width, Height);
         }
 
         public void Draw(SpriteBatch spriteBatch)

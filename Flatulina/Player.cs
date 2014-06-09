@@ -52,12 +52,13 @@ namespace Flatulina
 
         // ------------ Collision Fields ------------------------
 
-        // Area for collision detection
-        public Rectangle BoundingBox;
+        // Area for broad collision detection
+        public BoundingRect BoundingBox;
 
+        // Specific collision areas for regions of player
+        public BoundingRect Head, Feet, Left, Right;
 
-
-
+        public float thirdOfWidth, halfOfWidth, quarterOfHeight, halfOfHeight;
 
 
         // ---------- World "Physics" Fields -------------------
@@ -84,7 +85,7 @@ namespace Flatulina
         
 
 
-
+        // vvvvvvvvvv TRASH vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         // corners of the hit box
         public Vector2 TopLeft { get { return new Vector2(BoundingBox.Left, BoundingBox.Top); } }
         public Vector2 TopRight { get { return new Vector2(BoundingBox.Right, BoundingBox.Top); } }
@@ -94,7 +95,7 @@ namespace Flatulina
         public List<Vector2> Corners { get { return new List<Vector2>() { TopLeft, TopRight, BottomRight, BottomLeft }; } }
 
         public Vector2 collidingCorner;
-
+        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         public void Initialize(Texture2D a_texture, Vector2 a_position )
         {
@@ -126,13 +127,20 @@ namespace Flatulina
             jumping = false;
             jumpKeyDown = false;
 
+            // set broad collision area
+            BoundingBox = new BoundingRect(a_position.X, a_position.Y, (Width * scale), (Height * scale));
 
+            // set collision area calculation variables
+            thirdOfWidth = (int)(Width * scale / 3f);
+            halfOfWidth = (int)(Width * scale / 2f);
+            quarterOfHeight = (int)(Height * scale / 4f);
+            halfOfHeight = (int)(Height * scale / 2f);
 
-
-            BoundingBox = new Rectangle((int)a_position.X, (int)a_position.Y, (int)(Width * scale), (int)(Height * scale));
-
-
-
+            // set smaller collision areas
+            Head = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y, thirdOfWidth, quarterOfHeight);
+            Feet = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight);
+            Left = new BoundingRect(a_position.X, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            Right = new BoundingRect(a_position.X + halfOfWidth, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
 
             // Set the player to be Active
             Active = true;
@@ -144,7 +152,7 @@ namespace Flatulina
 
             // temp
             color = Color.White;
-            scale = 0.5f;
+            scale = 0.4f;
 
         }
 

@@ -21,16 +21,19 @@ namespace Flatulina
         // Position of the Player (relative to the upper left side of the screen)
         public Vector2 position;
 
+        // original dimensions of player texture
+        public float width, height;
+
         // Amount of hit points 
         public int health;
 
         // >>>>>>>>> General Properties <<<<<<<<
 
         // Get width of player 
-        public float Width { get { return playerTexture.Width * scale; } }
+        public float Width { get { return this.width * scale; } }
 
         // Get height of player
-        public float Height { get { return playerTexture.Height * scale; } }
+        public float Height { get { return this.height * scale; } }
 
 
         // ------------ Movement Fields ------------------------
@@ -83,8 +86,8 @@ namespace Flatulina
         public bool Active;
 
         // debug rectangle to draw
-        public Rectangle DebugRect;
-        public Color DebugRectColor;
+        //public Rectangle DebugRect;
+        //public Color DebugRectColor;
         
 
 
@@ -113,6 +116,10 @@ namespace Flatulina
             // Set starting position
             position = a_position;
 
+            // original width and height of texture
+            width = playerTexture.Width;
+            height = playerTexture.Height;
+
             // Set health
             
             // desired framerate
@@ -135,20 +142,20 @@ namespace Flatulina
             jumping = false;
             jumpKeyDown = false;
 
-            // set broad collision area
-            BoundingBox = new BoundingRect(a_position.X, a_position.Y, (Width * scale), (Height * scale));
-
             // set collision area calculation variables
-            thirdOfWidth = (int)(Width * scale / 3f);
-            halfOfWidth = (int)(Width * scale / 2f);
-            quarterOfHeight = (int)(Height * scale / 4f);
-            halfOfHeight = (int)(Height * scale / 2f);
+            thirdOfWidth = Width / 3f;
+            halfOfWidth = Width / 2f;
+            quarterOfHeight = Height / 4f;
+            halfOfHeight = Height / 2f;
 
             // set smaller collision areas
-            CollisionTop = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y, thirdOfWidth, quarterOfHeight);
-            CollisionBottom = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight);
-            CollisionLeft = new BoundingRect(a_position.X, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
-            CollisionRight = new BoundingRect(a_position.X + halfOfWidth, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionTop = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y - 5f, thirdOfWidth, quarterOfHeight + 10f);
+            CollisionBottom = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight + 5f);
+            CollisionLeft = new BoundingRect(this.position.X, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionRight = new BoundingRect(this.position.X + halfOfWidth, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+
+            // set broad collision area
+            BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
 
             // Set the player to be Active
             Active = true;
@@ -161,8 +168,8 @@ namespace Flatulina
             
 
             // debug stuff
-            DebugRect = new Rectangle((int)position.X, (int)position.Y, (int)Width, (int)Height);
-            DebugRectColor = Color.Red;
+            //DebugRect = new Rectangle((int)position.X, (int)position.Y, (int)Width, (int)Height);
+            //DebugRectColor = Color.Red;
 
         }
 
@@ -178,26 +185,57 @@ namespace Flatulina
 
         public void HandleCollisionWithSolid(BoundingRect solidRect)
         {
+            // need to recalc in case other collisions moved the body this frame
+            UpdateBoundingBoxes();
+
             if (CollisionTop.Intersects(solidRect))
             {
                 Console.WriteLine("Top Hit");
+                CollisionTop.DebugRectColor = Color.Green;
                 position.Y = solidRect.Position.Y - Height;
             }
+            else
+                CollisionTop.DebugRectColor = Color.Red;
+
             if (CollisionBottom.Intersects(solidRect))
             {
                 Console.WriteLine("Bottom Hit");
-                position.Y = solidRect.Position.Y + solidRect.Height;
+                CollisionBottom.DebugRectColor = Color.Green;
+                position.Y = solidRect.Position.Y - this.Height - 5;
             }
+            else
+                CollisionBottom.DebugRectColor = Color.Red;
+
             if (CollisionLeft.Intersects(solidRect))
             {
                 Console.WriteLine("Left Hit");
+                CollisionLeft.DebugRectColor = Color.Green;
                 position.X = solidRect.Position.X + solidRect.Width;
             }
+            else
+                CollisionLeft.DebugRectColor = Color.Red;
+
             if (CollisionRight.Intersects(solidRect))
             {
                 Console.WriteLine("Right Hit");
+                CollisionRight.DebugRectColor = Color.Green;
                 position.X = solidRect.Position.X - Width;
             }
+            else
+                CollisionRight.DebugRectColor = Color.Red;
+
         }
+
+        // Update Bounding Box and Collision Areas
+        public void UpdateBoundingBoxes()
+        {
+            this.BoundingBox.UpdatePosition(new Vector2(this.position.X, this.position.Y - 5f));
+
+            this.CollisionTop.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y - 5f));
+            this.CollisionBottom.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y + this.quarterOfHeight * 3f));
+            this.CollisionLeft.UpdatePosition(new Vector2(this.position.X, this.position.Y + this.quarterOfHeight));
+            this.CollisionRight.UpdatePosition(new Vector2(this.position.X + this.halfOfWidth, this.position.Y + this.quarterOfHeight));
+        }
+
     }
 }

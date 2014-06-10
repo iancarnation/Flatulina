@@ -19,8 +19,8 @@ namespace Flatulina
         // bool for going through bottom?
 
         // debug rectangle to draw
-        public Rectangle DebugRect;
-        public Color DebugRectColor;
+        //public Rectangle DebugRect;
+        //public Color DebugRectColor;
 
         public int Width
         {
@@ -38,13 +38,15 @@ namespace Flatulina
             Position = a_position;
             BoundingBox = new BoundingRect(Position.X, Position.Y, Width, Height);
 
-            DebugRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Width, (int)Height);
-            DebugRectColor = Color.Red;
+            //DebugRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Width, (int)Height);
+            //DebugRectColor = Color.Red;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(EnvTexture, Position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            
+
         }
     }
 }

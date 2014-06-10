@@ -113,7 +113,7 @@ namespace Flatulina
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
-            playerMoveSpeed = 8.0f;
+            playerMoveSpeed = 3.0f;
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -155,8 +155,9 @@ namespace Flatulina
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
             // Update the player
-            UpdatePlayer(gameTime);
             UpdateCollision();
+            UpdatePlayer(gameTime);
+            
             base.Update(gameTime);
         }
 
@@ -192,49 +193,43 @@ namespace Flatulina
             {
                 player.position.Y += playerMoveSpeed;
             }
-
+        
             // Make sure player does not go out of bounds
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
             player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
 
-            // Update Bounding Box and Collision Areas
-            player.BoundingBox.Position = player.position;
-            
-
-            player.CollisionTop.Position = new Vector2(player.position.X + player.thirdOfWidth, player.position.Y);
-            player.CollisionBottom.Position = new Vector2(player.position.X + player.thirdOfWidth, player.position.Y + player.quarterOfHeight * 3f);
-            player.CollisionLeft.Position = new Vector2(player.position.X, player.position.Y + player.quarterOfHeight);
-            player.CollisionRight.Position = new Vector2(player.position.X + player.halfOfWidth, player.position.Y + player.quarterOfHeight);
-
-            // update debug rects
-            player.DebugRect.X = (int)player.BoundingBox.Position.X;
-            player.DebugRect.Y = (int)player.BoundingBox.Position.Y;
+            player.UpdateBoundingBoxes();
         }
 
         private void UpdateCollision()
         {
+            player.CollisionTop.DebugRectColor = Color.Red;
+            player.CollisionBottom.DebugRectColor = Color.Red;
+            player.CollisionLeft.DebugRectColor = Color.Red;
+            player.CollisionRight.DebugRectColor = Color.Red;
+
             // for each of the collision solids in the environment..
             for (int i = 0; i < collisionSolids.Count; i++)
             {
-                Console.WriteLine("Player" + player.BoundingBox.Position);
+                //Console.WriteLine("Player" + player.BoundingBox.Position);
                 //Console.WriteLine("Solid" + collisionSolids[i].Position);
 
                 // check to see if player's general bounding box is colliding
                 if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
                 {
                     Console.WriteLine("Bounding Box Intersection");
-                    player.DebugRectColor = Color.Yellow;
+                    player.BoundingBox.DebugRectColor = Color.Yellow;
 
                     // run the player's collision area checks and adjust position accordingly
                     player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
                 }
                 else
-                    player.DebugRectColor = Color.Red;
+                    player.BoundingBox.DebugRectColor = Color.Red;
             }
         }
 
-        private void UpdateCollisionOld()
-        {
+       // private void UpdateCollisionOld()
+        //{
             //if (player.HitBox.Intersects(enemy.HitBox))
             //    player.color = Color.Red;
             //else
@@ -442,7 +437,7 @@ namespace Flatulina
         //    return cursor.Y - collidingCorner.Y;
 
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        }
+        //}
 
 
 
@@ -463,7 +458,11 @@ namespace Flatulina
             player.Draw(_spriteBatch);
 
             // draw player debug rect
-            DrawBorder(player.DebugRect, 2, player.DebugRectColor);
+            DrawBorder(player.BoundingBox.DebugRect, 2, player.BoundingBox.DebugRectColor);
+            DrawBorder(player.CollisionTop.DebugRect, 1, player.CollisionTop.DebugRectColor);
+            DrawBorder(player.CollisionBottom.DebugRect, 1, player.CollisionBottom.DebugRectColor);
+            DrawBorder(player.CollisionLeft.DebugRect, 1, player.CollisionLeft.DebugRectColor);
+            DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
 
             //enemy.Draw(_spriteBatch);
 
@@ -472,7 +471,7 @@ namespace Flatulina
                 collisionSolids[i].Draw(_spriteBatch);
 
                 // draw debug rectangles
-                DrawBorder(collisionSolids[i].DebugRect, 2, collisionSolids[i].DebugRectColor);
+                DrawBorder(collisionSolids[i].BoundingBox.DebugRect, 2, collisionSolids[i].BoundingBox.DebugRectColor);
             }
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
@@ -490,7 +489,7 @@ namespace Flatulina
         /// </summary>
         /// <param name="rectangleToDraw"></param>
         /// <param name="thicknessOfBorder"></param>
-        private void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
+        public void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
         {
             // Draw top line
             _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, rectangleToDraw.Width, thicknessOfBorder), borderColor);

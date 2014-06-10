@@ -27,7 +27,10 @@ namespace Flatulina
         public float Width { get { return this.Max.X - this.Min.X; } }
         public float Height { get { return this.Max.Y - this.Min.Y; } }
 
-        public Vector2 Position { get { return this.Min; } set { this.Min = value; } }
+        public Vector2 Position { 
+            get { return this.Min; } 
+            set { this.Min = value; } 
+        }
 
         private static BoundingRect mEmpty;
         private static BoundingRect mMinMax;
@@ -278,5 +281,10 @@ namespace Flatulina
 
             return false;
         }
+
+    //    public void UpdatePosition(Vector2 newPos)
+    //    {
+    //        Width = this.Width
+    //    }
     }
 }

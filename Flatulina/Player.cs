@@ -27,10 +27,10 @@ namespace Flatulina
         // >>>>>>>>> General Properties <<<<<<<<
 
         // Get width of player 
-        public int Width { get { return playerTexture.Width; } }
+        public float Width { get { return playerTexture.Width * scale; } }
 
         // Get height of player
-        public int Height { get { return playerTexture.Height; } }
+        public float Height { get { return playerTexture.Height * scale; } }
 
 
         // ------------ Movement Fields ------------------------
@@ -56,7 +56,7 @@ namespace Flatulina
         public BoundingRect BoundingBox;
 
         // Specific collision areas for regions of player
-        public BoundingRect Head, Feet, Left, Right;
+        public BoundingRect CollisionTop, CollisionBottom, CollisionLeft, CollisionRight;
 
         public float thirdOfWidth, halfOfWidth, quarterOfHeight, halfOfHeight;
 
@@ -82,6 +82,9 @@ namespace Flatulina
         // State of the player
         public bool Active;
 
+        // debug rectangle to draw
+        public Rectangle DebugRect;
+        public Color DebugRectColor;
         
 
 
@@ -99,6 +102,11 @@ namespace Flatulina
 
         public void Initialize(Texture2D a_texture, Vector2 a_position )
         {
+            // temp
+            color = Color.White;
+            scale = 0.4f;
+
+
             // set texture // ** to be animation later **
             playerTexture = a_texture;
 
@@ -137,10 +145,10 @@ namespace Flatulina
             halfOfHeight = (int)(Height * scale / 2f);
 
             // set smaller collision areas
-            Head = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y, thirdOfWidth, quarterOfHeight);
-            Feet = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight);
-            Left = new BoundingRect(a_position.X, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
-            Right = new BoundingRect(a_position.X + halfOfWidth, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionTop = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y, thirdOfWidth, quarterOfHeight);
+            CollisionBottom = new BoundingRect(a_position.X + thirdOfWidth, a_position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight);
+            CollisionLeft = new BoundingRect(a_position.X, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionRight = new BoundingRect(a_position.X + halfOfWidth, a_position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
 
             // Set the player to be Active
             Active = true;
@@ -150,9 +158,11 @@ namespace Flatulina
 
             collidingCorner = new Vector2(0, 0);
 
-            // temp
-            color = Color.White;
-            scale = 0.4f;
+            
+
+            // debug stuff
+            DebugRect = new Rectangle((int)position.X, (int)position.Y, (int)Width, (int)Height);
+            DebugRectColor = Color.Red;
 
         }
 
@@ -164,6 +174,30 @@ namespace Flatulina
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(playerTexture, position, null, color, 0f, Vector2.Zero, scale , SpriteEffects.None, 0f);
+        }
+
+        public void HandleCollisionWithSolid(BoundingRect solidRect)
+        {
+            if (CollisionTop.Intersects(solidRect))
+            {
+                Console.WriteLine("Top Hit");
+                position.Y = solidRect.Position.Y - Height;
+            }
+            if (CollisionBottom.Intersects(solidRect))
+            {
+                Console.WriteLine("Bottom Hit");
+                position.Y = solidRect.Position.Y + solidRect.Height;
+            }
+            if (CollisionLeft.Intersects(solidRect))
+            {
+                Console.WriteLine("Left Hit");
+                position.X = solidRect.Position.X + solidRect.Width;
+            }
+            if (CollisionRight.Intersects(solidRect))
+            {
+                Console.WriteLine("Right Hit");
+                position.X = solidRect.Position.X - Width;
+            }
         }
     }
 }

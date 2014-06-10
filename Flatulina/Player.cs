@@ -77,6 +77,7 @@ namespace Flatulina
         // True if jump key is currently held down
         public bool jumpKeyDown, jetKeyDown;
 
+        public bool onGround;
 
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
@@ -89,7 +90,7 @@ namespace Flatulina
 
 
         // State of the player
-        public bool Active;
+        //public bool Active;
 
         // debug rectangle to draw
         //public Rectangle DebugRect;
@@ -158,7 +159,7 @@ namespace Flatulina
             BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
 
             // Set the player to be Active
-            Active = true;
+            // Active = true;
 
             // Set player health
             health = 100;
@@ -199,7 +200,10 @@ namespace Flatulina
             {
                 Console.WriteLine("Bottom Hit");
                 CollisionBottom.DebugRectColor = Color.Green;
-                position.Y = solidRect.Position.Y - this.Height - 5;
+                position.Y = solidRect.Position.Y - this.Height - 1;
+                if (velocity.Y > 0.0f)
+                    velocity.Y = 0.0f;
+                this.onGround = true;
             }
             else
                 CollisionBottom.DebugRectColor = Color.Red;
@@ -209,6 +213,8 @@ namespace Flatulina
                 Console.WriteLine("Left Hit");
                 CollisionLeft.DebugRectColor = Color.Green;
                 position.X = solidRect.Position.X + solidRect.Width;
+                if (velocity.X < 0.0f)
+                    velocity.X = 0.0f;
             }
             else
                 CollisionLeft.DebugRectColor = Color.Red;
@@ -218,6 +224,8 @@ namespace Flatulina
                 Console.WriteLine("Right Hit");
                 CollisionRight.DebugRectColor = Color.Green;
                 position.X = solidRect.Position.X - Width;
+                if (velocity.X > 0.0f)
+                    velocity.X = 0.0f;
             }
             else
                 CollisionRight.DebugRectColor = Color.Red;

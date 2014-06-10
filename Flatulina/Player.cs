@@ -35,13 +35,16 @@ namespace Flatulina
 
         // ------------ Movement Fields ------------------------
 
-        public Vector2 velocity;
+        
 
         // amount of X acceleration/deceleration to apply when player moves in X / is not moving in X
-        public float accX, decX;
+        public float accX, accY, decX;
+
+        // The amount of X and Y movement to occur on the next frame
+        public Vector2 velocity;
 
         // amount of upward force to apply when the player first presses jump
-        public float jumpVelocityY; // ** maybe this becomes a Vec2? **
+        public float jumpVelocityY, jetVelocityY; // ** maybe this becomes a Vec2? **
 
         // maximum velocity allowed
         public Vector2 maxVelocity;
@@ -53,7 +56,7 @@ namespace Flatulina
         // ------------ Collision Fields ------------------------
 
         // Area for collision detection
-        public Rectangle BoundingBox;
+        public Rectangle BoundingBox, fuelOutline, fuelFill;
 
 
 
@@ -68,11 +71,12 @@ namespace Flatulina
         // ----------- Player States ---------------------------
 
         // True if currently jumping (prevents double jump)
-        public bool jumping;
+        public bool jumping, jet;
 
         // True if jump key is currently held down
-        public bool jumpKeyDown;
+        public bool jumpKeyDown, jetKeyDown;
 
+        public int fuel;
 
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
@@ -112,25 +116,34 @@ namespace Flatulina
             // Set velocity
             velocity = new Vector2(0.0f, 0.0f);
             // Set accel/decel
-            accX = 0.2f * mScale;
-            decX = 0.3f * mScale;
+            accX = 0.15f * mScale;
+            accY = 0.4f * mScale; 
+            decX = 0.2f * mScale;
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
+            jetVelocityY = 4.0f * mScale;
             // Set max velocity
-            maxVelocity = new Vector2(5.0f * mScale, 10.0f * mScale);
+            maxVelocity = new Vector2(3.0f * mScale, 12.0f * mScale);
 
             // Set gravity
-            gravityAccel = 0.5f * mScale;
+            gravityAccel = 0.4f * mScale;
             
             // Set states
+            // jump
             jumping = false;
             jumpKeyDown = false;
+            // jet fart (NOT USED)
+            //jet = false;
+            //jetKeyDown = false;
+
+            fuel = 100; 
 
 
 
 
             BoundingBox = new Rectangle((int)a_position.X, (int)a_position.Y, (int)(Width * scale), (int)(Height * scale));
-
+            fuelOutline = new Rectangle(8, 64, 201, 20);
+            fuelFill = new Rectangle(9, 64, fuelFill.X+(fuel*25), 19);
 
 
 
@@ -144,7 +157,7 @@ namespace Flatulina
 
             // temp
             color = Color.White;
-            scale = 0.5f;
+            scale = 0.25f;
 
         }
 

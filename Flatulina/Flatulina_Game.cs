@@ -112,8 +112,7 @@ namespace Flatulina
             player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
-            // Set a constant player move speed
-            playerMoveSpeed = 3.0f;
+         
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -169,34 +168,80 @@ namespace Flatulina
 
         private void UpdatePlayer(GameTime gameTime)
         {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            bool moveRequest = false;
+
             // Get Thumbstick Controls
-            player.position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.position.Y += currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
+            player.position.Y += player.velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
             {
-                player.position.X -= playerMoveSpeed;
+                player.velocity.X -= player.accX;
+                moveRequest = true;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
             {
-                player.position.X += playerMoveSpeed;
+                player.velocity.X += player.accX;
+                moveRequest = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W) || currentGamePadState.DPad.Up == ButtonState.Pressed)
+            // JUMPING
+            if (currentKeyboardState.IsKeyDown(Keys.Space) && !player.jumping && !player.jumpKeyDown)
             {
-                player.position.Y -= playerMoveSpeed;
+                player.jumping = true;
+                player.jumpKeyDown = true;
+                player.velocity.Y = -player.jumpVelocityY;
+            }
+            // jump key released
+            if (!currentKeyboardState.IsKeyDown(Keys.Space))
+            {
+                player.jumpKeyDown = false;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S) || currentGamePadState.DPad.Down == ButtonState.Pressed)
+            // JET FART
+            if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
             {
-                player.position.Y += playerMoveSpeed;
+                player.fuel -= 1;
+                //player.jet = true;
+                //player.jetKeyDown = true;
+                player.velocity.Y = -player.jetVelocityY;
             }
-        
+
+            if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
+            if (player.velocity.X < -player.maxVelocity.X) player.velocity.X = -player.maxVelocity.X;
+            if (player.velocity.Y < -player.maxVelocity.Y) player.velocity.Y = -player.maxVelocity.Y;
+
+            if (!moveRequest)
+            {
+                if (player.velocity.X < 0) player.velocity.X += player.decX;
+                if (player.velocity.X > 0) player.velocity.X -= player.decX;
+                // Deceleration may produce a speed that is greater than zero but
+                // smaller than the smallest unit of deceleration. These lines ensure
+                // that the player does not keep travelling at slow speed forever after
+                // decelerating.
+                if (player.velocity.X > 0 && player.velocity.X < player.decX) player.velocity.X = 0;
+                if (player.velocity.X < 0 && player.velocity.X > -player.decX) player.velocity.X = 0;
+            }
+
             // Make sure player does not go out of bounds
+            // Temporary fix until dinal collision is added
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
+            if (player.position.Y > 540)
+            {
+                player.position.Y = MathHelper.Clamp(player.position.Y, 0, 540/*GraphicsDevice.Viewport.Height - (player.Height + 350) * player.scale*/);
+                player.jumping = false;
+                player.jet = false;
+            }
+
+            // GRAVITY //
+            player.velocity.Y += player.gravityAccel;
+
+            // UPDATE FUEL HUD
+            player.fuelFill.Width = player.fuel * 2;
+
 
             player.UpdateBoundingBoxes();
         }
@@ -456,6 +501,10 @@ namespace Flatulina
 
             // Draw Player
             player.Draw(_spriteBatch);
+
+            // HUD
+            _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);
+            DrawBorder(player.fuelOutline, 2, Color.White); 
 
             // draw player debug rect
             DrawBorder(player.BoundingBox.DebugRect, 2, player.BoundingBox.DebugRectColor);

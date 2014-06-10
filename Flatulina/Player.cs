@@ -72,14 +72,20 @@ namespace Flatulina
         // ----------- Player States ---------------------------
 
         // True if currently jumping (prevents double jump)
-        public bool jumping;
+        public bool jumping, jet;
 
         // True if jump key is currently held down
-        public bool jumpKeyDown;
+        public bool jumpKeyDown, jetKeyDown;
 
 
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
+
+        public float jetVelocityY;
+
+        public Rectangle fuelOutline, fuelFill; // for drawing fuel meter
+
+        public int fuel;
 
 
         // State of the player
@@ -92,15 +98,7 @@ namespace Flatulina
 
 
         // vvvvvvvvvv TRASH vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        // corners of the hit box
-        public Vector2 TopLeft { get { return new Vector2(BoundingBox.Left, BoundingBox.Top); } }
-        public Vector2 TopRight { get { return new Vector2(BoundingBox.Right, BoundingBox.Top); } }
-        public Vector2 BottomRight { get { return new Vector2(BoundingBox.Right, BoundingBox.Bottom); } }
-        public Vector2 BottomLeft { get { return new Vector2(BoundingBox.Left, BoundingBox.Bottom); } }
-
-        public List<Vector2> Corners { get { return new List<Vector2>() { TopLeft, TopRight, BottomRight, BottomLeft }; } }
-
-        public Vector2 collidingCorner;
+       
         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         public void Initialize(Texture2D a_texture, Vector2 a_position )
@@ -128,15 +126,17 @@ namespace Flatulina
             // Set velocity
             velocity = new Vector2(0.0f, 0.0f);
             // Set accel/decel
-            accX = 0.2f * mScale;
-            decX = 0.3f * mScale;
+            accX = 0.15f * mScale;
+            decX = 0.2f * mScale;
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
+            // Set jet velocity
+            jetVelocityY = 4.0f * mScale;
             // Set max velocity
-            maxVelocity = new Vector2(5.0f * mScale, 10.0f * mScale);
+            maxVelocity = new Vector2(3.0f * mScale, 12.0f * mScale);
 
             // Set gravity
-            gravityAccel = 0.5f * mScale;
+            gravityAccel = 0.4f * mScale;
             
             // Set states
             jumping = false;
@@ -163,13 +163,11 @@ namespace Flatulina
             // Set player health
             health = 100;
 
-            collidingCorner = new Vector2(0, 0);
+            fuel = 100;
 
-            
+            fuelOutline = new Rectangle(8, 64, 201, 20);
+            fuelFill = new Rectangle(9, 64, fuelFill.X + (fuel * 25), 19);
 
-            // debug stuff
-            //DebugRect = new Rectangle((int)position.X, (int)position.Y, (int)Width, (int)Height);
-            //DebugRectColor = Color.Red;
 
         }
 

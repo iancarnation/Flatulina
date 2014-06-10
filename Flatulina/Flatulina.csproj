@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
+    <Compile Include="BoundingRect.cs" />
     <Compile Include="EnvironmentSolid.cs" />
     <Compile Include="Flatulina_Game.cs" />
     <Compile Include="Player.cs" />
@@ -65,6 +66,10 @@
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\floor.xnb">
       <Link>Content\Graphics\floor.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tempCherub.xnb">
+      <Link>Content\Graphics\tempCherub.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tower.xnb">

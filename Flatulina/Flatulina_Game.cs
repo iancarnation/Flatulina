@@ -22,6 +22,7 @@ namespace Flatulina
         SpriteBatch _spriteBatch;
 
         SpriteFont Font1;
+        Texture2D pixel;
 
         // Represents player
         Player player;
@@ -100,15 +101,19 @@ namespace Flatulina
             Font1 = Content.Load<SpriteFont>("Graphics\\Courier New");
             //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
 
+            // for drawing debug rectangles
+            pixel = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            pixel.SetData(new[] { Color.White }); // so that we can draw whatever color we want on top of it
+
             // Load player resources
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
-            Vector2 enemyPosition = new Vector2(500, 100);
+            // Vector2 enemyPosition = new Vector2(500, 100);
 
-            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), playerPosition);
+            player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
-            playerMoveSpeed = 8.0f;
+            playerMoveSpeed = 3.0f;
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -117,6 +122,7 @@ namespace Flatulina
             Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
             tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
+            Console.WriteLine("Loadeddddd");
 
             //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
         }
@@ -149,8 +155,9 @@ namespace Flatulina
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
             // Update the player
-            UpdatePlayer(gameTime);
             UpdateCollision();
+            UpdatePlayer(gameTime);
+            
             base.Update(gameTime);
         }
 
@@ -186,18 +193,43 @@ namespace Flatulina
             {
                 player.position.Y += playerMoveSpeed;
             }
-
+        
             // Make sure player does not go out of bounds
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
             player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
 
-            // Update HitBox
-            player.BoundingBox.X = (int)player.position.X;
-            player.BoundingBox.Y = (int)player.position.Y;
+            player.UpdateBoundingBoxes();
         }
 
         private void UpdateCollision()
         {
+            player.CollisionTop.DebugRectColor = Color.Red;
+            player.CollisionBottom.DebugRectColor = Color.Red;
+            player.CollisionLeft.DebugRectColor = Color.Red;
+            player.CollisionRight.DebugRectColor = Color.Red;
+
+            // for each of the collision solids in the environment..
+            for (int i = 0; i < collisionSolids.Count; i++)
+            {
+                //Console.WriteLine("Player" + player.BoundingBox.Position);
+                //Console.WriteLine("Solid" + collisionSolids[i].Position);
+
+                // check to see if player's general bounding box is colliding
+                if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
+                {
+                    Console.WriteLine("Bounding Box Intersection");
+                    player.BoundingBox.DebugRectColor = Color.Yellow;
+
+                    // run the player's collision area checks and adjust position accordingly
+                    player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
+                }
+                else
+                    player.BoundingBox.DebugRectColor = Color.Red;
+            }
+        }
+
+       // private void UpdateCollisionOld()
+        //{
             //if (player.HitBox.Intersects(enemy.HitBox))
             //    player.color = Color.Red;
             //else
@@ -209,196 +241,205 @@ namespace Flatulina
             //    player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, floor.Position.Y - player.Height * player.scale);
             //}
 
-            // source: http://gamedev.stackexchange.com/questions/14486/2d-platformer-aabb-collision-problems/14491#14491
-
-            // This loop repeats until player has been fully pushed outside of all collision objects
-            while (StillCollidingWithEnvironment(player))
-            {
-                float xDistanceToResolve = XDistanceToMoveToResolveCollisions(player);
-                float yDistanceToResolve = YDistanceToMoveToResolveCollisions(player);
-                bool xIsColliding = (xDistanceToResolve != 0.0f);
-
-                /* if we aren't colliding on x (not possible for normal solid collision
-                   shapes, but can happen for unidirectional collision objects, such as
-                 * platforms which can be jumped up throug, but support the player from
-                 * above), or if a correction along y would simply require a smaller move
-                 * than one along x, then resolve our collision by moving along y.
-                 * */
-
-                if (!xIsColliding || Math.Abs(yDistanceToResolve) < Math.Abs(xDistanceToResolve))
-                {
-                    player.position.Y += yDistanceToResolve;
-                    break;
-                }
-                else // otherwise, resolve the collision by moving along x
-                    player.position.X += xDistanceToResolve; break;
-            }
+            
 
 
-        }
 
-        bool StillCollidingWithEnvironment(Player player)
-        {
-            // loop over every collision object in the world (don't test player against itself)
-            for (int i = 0; i < collisionSolids.Count; i++)
-            {
-                // if the player overlaps any environment solids, then it's colliding
-                if (player.BoundingBox.Intersects(collisionSolids[i].HitBox))
-                {
-                    // find one of the player's hitbox corners that is colliding
-                    for (int c = 0; c < 4; c++)
-                    {
-                        if (collisionSolids[i].HitBox.Contains(player.Corners[c]))
-                        {
-                            player.collidingCorner = player.Corners[c];
-                            break;
-                        }
-                    }
+            // vvvvvvvvvvvvvvvvvvvv Old Collision Attempt vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        //    // source: http://gamedev.stackexchange.com/questions/14486/2d-platformer-aabb-collision-problems/14491#14491
+        
+        //    // This loop repeats until player has been fully pushed outside of all collision objects
+        //    while (StillCollidingWithEnvironment(player))
+        //    {
+        //        float xDistanceToResolve = XDistanceToMoveToResolveCollisions(player);
+        //        float yDistanceToResolve = YDistanceToMoveToResolveCollisions(player);
+        //        bool xIsColliding = (xDistanceToResolve != 0.0f);
 
-                    return true;
-                }
-            }
+        //        /* if we aren't colliding on x (not possible for normal solid collision
+        //           shapes, but can happen for unidirectional collision objects, such as
+        //         * platforms which can be jumped up throug, but support the player from
+        //         * above), or if a correction along y would simply require a smaller move
+        //         * than one along x, then resolve our collision by moving along y.
+        //         * */
 
-            return false;
-        }
+        //        if (!xIsColliding || Math.Abs(yDistanceToResolve) < Math.Abs(xDistanceToResolve))
+        //        {
+        //            player.position.Y += yDistanceToResolve;
+        //            break;
+        //        }
+        //        else // otherwise, resolve the collision by moving along x
+        //            player.position.X += xDistanceToResolve; break;
+        //    }
 
-        float XDistanceToMoveToResolveCollisions(Player player)
-        {
-            // check how far we'd have to move left or right to stop colliding with anything
-            // return whichever move is smaller
-            float moveOutLeft = FindDistanceToEmptySpaceAlongNegativeX(player.collidingCorner);
-            float moveOutRight = FindDistanceToEmptySpaceAlongX(player.collidingCorner);
-            float bestMoveOut = MathHelper.Min(Math.Abs(moveOutLeft), Math.Abs(moveOutRight));
 
-            // if we need to move left, return negative x
-            if (bestMoveOut == Math.Abs(moveOutLeft))
-                return - bestMoveOut;
+        //}
 
-            return bestMoveOut;
-        }
+        //bool StillCollidingWithEnvironment(Player player)
+        //{
+        //    // loop over every collision object in the world (don't test player against itself)
+        //    for (int i = 0; i < collisionSolids.Count; i++)
+        //    {
+        //        // if the player overlaps any environment solids, then it's colliding
+        //        if (player.BoundingBox.Intersects(collisionSolids[i].HitBox))
+        //        {
+        //            // find one of the player's hitbox corners that is colliding
+        //            for (int c = 0; c < 4; c++)
+        //            {
+        //                if (collisionSolids[i].HitBox.Contains(player.Corners[c]))
+        //                {
+        //                    player.collidingCorner = player.Corners[c];
+        //                    break;
+        //                }
+        //            }
 
-        float FindDistanceToEmptySpaceAlongX(Vector2 collidingCorner)
-        {
-            Vector2 cursor = collidingCorner;
-            //bool colliding = true;
-            // until we stop colliding....
-            //while (colliding)
-            //{
-                //colliding = false;
-                // loop over all collision objects
-                for (int i = 0; i < collisionSolids.Count; i++)
-                {
-                    // and if we hit an object..
-                    if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
-                    {
-                        // move outside of the object, and repeat
-                        cursor.X = collisionSolids[i].HitBox.Right;
-                        //colliding = true;
+        //            return true;
+        //        }
+        //    }
 
-                        // break back to the while loop, to re-test collisions with new cursor position
-                        break;
-                    }
-                }
-            //}
-            // return how far we had to move, to reach empty space
-            return cursor.X - collidingCorner.X;
-        }
+        //    return false;
+        //}
 
-        float FindDistanceToEmptySpaceAlongNegativeX(Vector2 collidingCorner)
-        {
-            Vector2 cursor = collidingCorner;
-            //bool colliding = true;
-            // until we stop colliding....
-            //while (colliding)
-            //{
-               // colliding = false;
-                // loop over all collision objects
-                for (int i = 0; i < collisionSolids.Count; i++)
-                {
-                    // and if we hit an object..
-                    if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
-                    {
-                        // move outside of the object, and repeat
-                        cursor.X = collisionSolids[i].HitBox.Left;
-                       // colliding = true;
+        //float XDistanceToMoveToResolveCollisions(Player player)
+        //{
+        //    // check how far we'd have to move left or right to stop colliding with anything
+        //    // return whichever move is smaller
+        //    float moveOutLeft = FindDistanceToEmptySpaceAlongNegativeX(player.collidingCorner);
+        //    float moveOutRight = FindDistanceToEmptySpaceAlongX(player.collidingCorner);
+        //    float bestMoveOut = MathHelper.Min(Math.Abs(moveOutLeft), Math.Abs(moveOutRight));
 
-                        // break back to the while loop, to re-test collisions with new cursor position
-                        break;
-                    }
-                }
-            //}
-            // return how far we had to move, to reach empty space
-            return cursor.X - collidingCorner.X;
-        }
+        //    // if we need to move left, return negative x
+        //    if (bestMoveOut == Math.Abs(moveOutLeft))
+        //        return - bestMoveOut;
 
-        float YDistanceToMoveToResolveCollisions(Player player)
-        {
-            // check how far we'd have to move up or down to stop colliding with anything
-            // return whichever move is smaller
-            float moveOutUp = FindDistanceToEmptySpaceAlongNegativeY(player.collidingCorner);
-            float moveOutDown = FindDistanceToEmptySpaceAlongY(player.collidingCorner);
-            float bestMoveOut = MathHelper.Min(Math.Abs(moveOutUp), Math.Abs(moveOutDown));
+        //    return bestMoveOut;
+        //}
 
-            // if the best move is up, need to return a negative Y value
-            if (bestMoveOut == Math.Abs(moveOutUp))
-                return - bestMoveOut;
+        //float FindDistanceToEmptySpaceAlongX(Vector2 collidingCorner)
+        //{
+        //    Vector2 cursor = collidingCorner;
+        //    //bool colliding = true;
+        //    // until we stop colliding....
+        //    //while (colliding)
+        //    //{
+        //        //colliding = false;
+        //        // loop over all collision objects
+        //        for (int i = 0; i < collisionSolids.Count; i++)
+        //        {
+        //            // and if we hit an object..
+        //            if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
+        //            {
+        //                // move outside of the object, and repeat
+        //                cursor.X = collisionSolids[i].HitBox.Right;
+        //                //colliding = true;
 
-            return bestMoveOut;
-        }
+        //                // break back to the while loop, to re-test collisions with new cursor position
+        //                break;
+        //            }
+        //        }
+        //    //}
+        //    // return how far we had to move, to reach empty space
+        //    return cursor.X - collidingCorner.X;
+        //}
 
-        float FindDistanceToEmptySpaceAlongY(Vector2 collidingCorner)
-        {
-            Vector2 cursor = collidingCorner;
-            //bool colliding = true;
-            // until we stop colliding....
-           // while (colliding)
-            //{
-                //colliding = false;
-                // loop over all collision objects
-                for (int i = 0; i < collisionSolids.Count; i++)
-                {
-                    // and if we hit an object..
-                    if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
-                    {
-                        // move outside of the object, and repeat
-                        cursor.Y = collisionSolids[i].HitBox.Bottom;
-                        //colliding = true;
+        //float FindDistanceToEmptySpaceAlongNegativeX(Vector2 collidingCorner)
+        //{
+        //    Vector2 cursor = collidingCorner;
+        //    //bool colliding = true;
+        //    // until we stop colliding....
+        //    //while (colliding)
+        //    //{
+        //       // colliding = false;
+        //        // loop over all collision objects
+        //        for (int i = 0; i < collisionSolids.Count; i++)
+        //        {
+        //            // and if we hit an object..
+        //            if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
+        //            {
+        //                // move outside of the object, and repeat
+        //                cursor.X = collisionSolids[i].HitBox.Left;
+        //               // colliding = true;
 
-                        // break back to the while loop, to re-test collisions with new cursor position
-                        break;
-                    }
-                }
-            //}
-            // return how far we had to move, to reach empty space
-            return cursor.Y - collidingCorner.Y;
-        }
+        //                // break back to the while loop, to re-test collisions with new cursor position
+        //                break;
+        //            }
+        //        }
+        //    //}
+        //    // return how far we had to move, to reach empty space
+        //    return cursor.X - collidingCorner.X;
+        //}
 
-        float FindDistanceToEmptySpaceAlongNegativeY(Vector2 collidingCorner)
-        {
-            Vector2 cursor = collidingCorner;
-            //bool colliding = true;
-            // until we stop colliding....
-           // while (colliding)
-           // {
-               // colliding = false;
-                // loop over all collision objects
-                for (int i = 0; i < collisionSolids.Count; i++)
-                {
-                    // and if we hit an object..
-                    if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
-                    {
-                        // move outside of the object, and repeat
-                        cursor.Y = collisionSolids[i].HitBox.Top;
-                        //colliding = true;
+        //float YDistanceToMoveToResolveCollisions(Player player)
+        //{
+        //    // check how far we'd have to move up or down to stop colliding with anything
+        //    // return whichever move is smaller
+        //    float moveOutUp = FindDistanceToEmptySpaceAlongNegativeY(player.collidingCorner);
+        //    float moveOutDown = FindDistanceToEmptySpaceAlongY(player.collidingCorner);
+        //    float bestMoveOut = MathHelper.Min(Math.Abs(moveOutUp), Math.Abs(moveOutDown));
 
-                        // break back to the while loop, to re-test collisions with new cursor position
-                        break;
-                    }
-                }
-            //}
-            // return how far we had to move, to reach empty space
-            return cursor.Y - collidingCorner.Y;
-        }
+        //    // if the best move is up, need to return a negative Y value
+        //    if (bestMoveOut == Math.Abs(moveOutUp))
+        //        return - bestMoveOut;
+
+        //    return bestMoveOut;
+        //}
+
+        //float FindDistanceToEmptySpaceAlongY(Vector2 collidingCorner)
+        //{
+        //    Vector2 cursor = collidingCorner;
+        //    //bool colliding = true;
+        //    // until we stop colliding....
+        //   // while (colliding)
+        //    //{
+        //        //colliding = false;
+        //        // loop over all collision objects
+        //        for (int i = 0; i < collisionSolids.Count; i++)
+        //        {
+        //            // and if we hit an object..
+        //            if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
+        //            {
+        //                // move outside of the object, and repeat
+        //                cursor.Y = collisionSolids[i].HitBox.Bottom;
+        //                //colliding = true;
+
+        //                // break back to the while loop, to re-test collisions with new cursor position
+        //                break;
+        //            }
+        //        }
+        //    //}
+        //    // return how far we had to move, to reach empty space
+        //    return cursor.Y - collidingCorner.Y;
+        //}
+
+        //float FindDistanceToEmptySpaceAlongNegativeY(Vector2 collidingCorner)
+        //{
+        //    Vector2 cursor = collidingCorner;
+        //    //bool colliding = true;
+        //    // until we stop colliding....
+        //   // while (colliding)
+        //   // {
+        //       // colliding = false;
+        //        // loop over all collision objects
+        //        for (int i = 0; i < collisionSolids.Count; i++)
+        //        {
+        //            // and if we hit an object..
+        //            if (collisionSolids[i].HitBox.Contains(cursor.X, cursor.Y))
+        //            {
+        //                // move outside of the object, and repeat
+        //                cursor.Y = collisionSolids[i].HitBox.Top;
+        //                //colliding = true;
+
+        //                // break back to the while loop, to re-test collisions with new cursor position
+        //                break;
+        //            }
+        //        }
+        //    //}
+        //    // return how far we had to move, to reach empty space
+        //    return cursor.Y - collidingCorner.Y;
+
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //}
+
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -415,16 +456,57 @@ namespace Flatulina
 
             // Draw Player
             player.Draw(_spriteBatch);
+
+            // draw player debug rect
+            DrawBorder(player.BoundingBox.DebugRect, 2, player.BoundingBox.DebugRectColor);
+            DrawBorder(player.CollisionTop.DebugRect, 1, player.CollisionTop.DebugRectColor);
+            DrawBorder(player.CollisionBottom.DebugRect, 1, player.CollisionBottom.DebugRectColor);
+            DrawBorder(player.CollisionLeft.DebugRect, 1, player.CollisionLeft.DebugRectColor);
+            DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
+
             //enemy.Draw(_spriteBatch);
 
             for (int i = 0; i < collisionSolids.Count; i++)
+            {
                 collisionSolids[i].Draw(_spriteBatch);
+
+                // draw debug rectangles
+                DrawBorder(collisionSolids[i].BoundingBox.DebugRect, 2, collisionSolids[i].BoundingBox.DebugRectColor);
+            }
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
 
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        /// <summary>
+        /// Will draw a border (hollow rectangle) of the given 'thicknessOfBorder' (in pixels)
+        /// of the specified color.
+        ///
+        /// By Sean Colombo, from http://bluelinegamestudios.com/blog
+        /// </summary>
+        /// <param name="rectangleToDraw"></param>
+        /// <param name="thicknessOfBorder"></param>
+        public void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
+        {
+            // Draw top line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, rectangleToDraw.Width, thicknessOfBorder), borderColor);
+
+            // Draw left line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, thicknessOfBorder, rectangleToDraw.Height), borderColor);
+
+            // Draw right line
+            _spriteBatch.Draw(pixel, new Rectangle((rectangleToDraw.X + rectangleToDraw.Width - thicknessOfBorder),
+                                            rectangleToDraw.Y,
+                                            thicknessOfBorder,
+                                            rectangleToDraw.Height), borderColor);
+            // Draw bottom line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X,
+                                            rectangleToDraw.Y + rectangleToDraw.Height - thicknessOfBorder,
+                                            rectangleToDraw.Width,
+                                            thicknessOfBorder), borderColor);
         }
     }
 }

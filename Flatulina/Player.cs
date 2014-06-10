@@ -21,16 +21,19 @@ namespace Flatulina
         // Position of the Player (relative to the upper left side of the screen)
         public Vector2 position;
 
+        // original dimensions of player texture
+        public float width, height;
+
         // Amount of hit points 
         public int health;
 
         // >>>>>>>>> General Properties <<<<<<<<
 
         // Get width of player 
-        public int Width { get { return playerTexture.Width; } }
+        public float Width { get { return this.width * scale; } }
 
         // Get height of player
-        public int Height { get { return playerTexture.Height; } }
+        public float Height { get { return this.height * scale; } }
 
 
         // ------------ Movement Fields ------------------------
@@ -52,12 +55,13 @@ namespace Flatulina
 
         // ------------ Collision Fields ------------------------
 
-        // Area for collision detection
-        public Rectangle BoundingBox;
+        // Area for broad collision detection
+        public BoundingRect BoundingBox;
 
+        // Specific collision areas for regions of player
+        public BoundingRect CollisionTop, CollisionBottom, CollisionLeft, CollisionRight;
 
-
-
+        public float thirdOfWidth, halfOfWidth, quarterOfHeight, halfOfHeight;
 
 
         // ---------- World "Physics" Fields -------------------
@@ -81,10 +85,13 @@ namespace Flatulina
         // State of the player
         public bool Active;
 
+        // debug rectangle to draw
+        //public Rectangle DebugRect;
+        //public Color DebugRectColor;
         
 
 
-
+        // vvvvvvvvvv TRASH vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         // corners of the hit box
         public Vector2 TopLeft { get { return new Vector2(BoundingBox.Left, BoundingBox.Top); } }
         public Vector2 TopRight { get { return new Vector2(BoundingBox.Right, BoundingBox.Top); } }
@@ -94,15 +101,24 @@ namespace Flatulina
         public List<Vector2> Corners { get { return new List<Vector2>() { TopLeft, TopRight, BottomRight, BottomLeft }; } }
 
         public Vector2 collidingCorner;
-
+        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         public void Initialize(Texture2D a_texture, Vector2 a_position )
         {
+            // temp
+            color = Color.White;
+            scale = 0.4f;
+
+
             // set texture // ** to be animation later **
             playerTexture = a_texture;
 
             // Set starting position
             position = a_position;
+
+            // original width and height of texture
+            width = playerTexture.Width;
+            height = playerTexture.Height;
 
             // Set health
             
@@ -126,13 +142,20 @@ namespace Flatulina
             jumping = false;
             jumpKeyDown = false;
 
+            // set collision area calculation variables
+            thirdOfWidth = Width / 3f;
+            halfOfWidth = Width / 2f;
+            quarterOfHeight = Height / 4f;
+            halfOfHeight = Height / 2f;
 
+            // set smaller collision areas
+            CollisionTop = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y - 5f, thirdOfWidth, quarterOfHeight + 10f);
+            CollisionBottom = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight + 5f);
+            CollisionLeft = new BoundingRect(this.position.X, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionRight = new BoundingRect(this.position.X + halfOfWidth, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
 
-
-            BoundingBox = new Rectangle((int)a_position.X, (int)a_position.Y, (int)(Width * scale), (int)(Height * scale));
-
-
-
+            // set broad collision area
+            BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
 
             // Set the player to be Active
             Active = true;
@@ -142,9 +165,11 @@ namespace Flatulina
 
             collidingCorner = new Vector2(0, 0);
 
-            // temp
-            color = Color.White;
-            scale = 0.5f;
+            
+
+            // debug stuff
+            //DebugRect = new Rectangle((int)position.X, (int)position.Y, (int)Width, (int)Height);
+            //DebugRectColor = Color.Red;
 
         }
 
@@ -157,5 +182,60 @@ namespace Flatulina
         {
             spriteBatch.Draw(playerTexture, position, null, color, 0f, Vector2.Zero, scale , SpriteEffects.None, 0f);
         }
+
+        public void HandleCollisionWithSolid(BoundingRect solidRect)
+        {
+            // need to recalc in case other collisions moved the body this frame
+            UpdateBoundingBoxes();
+
+            if (CollisionTop.Intersects(solidRect))
+            {
+                Console.WriteLine("Top Hit");
+                CollisionTop.DebugRectColor = Color.Green;
+                position.Y = solidRect.Position.Y - Height;
+            }
+            else
+                CollisionTop.DebugRectColor = Color.Red;
+
+            if (CollisionBottom.Intersects(solidRect))
+            {
+                Console.WriteLine("Bottom Hit");
+                CollisionBottom.DebugRectColor = Color.Green;
+                position.Y = solidRect.Position.Y - this.Height - 5;
+            }
+            else
+                CollisionBottom.DebugRectColor = Color.Red;
+
+            if (CollisionLeft.Intersects(solidRect))
+            {
+                Console.WriteLine("Left Hit");
+                CollisionLeft.DebugRectColor = Color.Green;
+                position.X = solidRect.Position.X + solidRect.Width;
+            }
+            else
+                CollisionLeft.DebugRectColor = Color.Red;
+
+            if (CollisionRight.Intersects(solidRect))
+            {
+                Console.WriteLine("Right Hit");
+                CollisionRight.DebugRectColor = Color.Green;
+                position.X = solidRect.Position.X - Width;
+            }
+            else
+                CollisionRight.DebugRectColor = Color.Red;
+
+        }
+
+        // Update Bounding Box and Collision Areas
+        public void UpdateBoundingBoxes()
+        {
+            this.BoundingBox.UpdatePosition(new Vector2(this.position.X, this.position.Y - 5f));
+
+            this.CollisionTop.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y - 5f));
+            this.CollisionBottom.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y + this.quarterOfHeight * 3f));
+            this.CollisionLeft.UpdatePosition(new Vector2(this.position.X, this.position.Y + this.quarterOfHeight));
+            this.CollisionRight.UpdatePosition(new Vector2(this.position.X + this.halfOfWidth, this.position.Y + this.quarterOfHeight));
+        }
+
     }
 }

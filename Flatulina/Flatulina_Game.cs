@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.GamerServices;
 
 
 
+
 namespace Flatulina
 {
     /// <summary>
@@ -18,6 +19,8 @@ namespace Flatulina
     /// </summary>
     public class Flatulina_Game : Game
     {
+        Texture2D pixel;
+
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
 
@@ -25,12 +28,14 @@ namespace Flatulina
 
         // Represents player
         Player player;
+        // Powerups
+        Powerup[] powerups;
         //Player enemy;
 
         // Environment stuff
         List<EnvironmentSolid> collisionSolids;
         EnvironmentSolid floor;
-        EnvironmentSolid tower1;
+        //EnvironmentSolid tower1;
 
         // Keyboard states used to determine key presses
         KeyboardState currentKeyboardState;
@@ -66,6 +71,31 @@ namespace Flatulina
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
+        /// 
+        private void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
+        {
+            // Draw top line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, rectangleToDraw.Width, thicknessOfBorder), borderColor);
+
+            // Draw left line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, thicknessOfBorder, rectangleToDraw.Height), borderColor);
+
+            // Draw right line
+            _spriteBatch.Draw(pixel, new Rectangle((rectangleToDraw.X + rectangleToDraw.Width - thicknessOfBorder),
+                                            rectangleToDraw.Y,
+                                            thicknessOfBorder,
+                                            rectangleToDraw.Height), borderColor);
+            // Draw bottom line
+            _spriteBatch.Draw(pixel, new Rectangle(rectangleToDraw.X,
+                                            rectangleToDraw.Y + rectangleToDraw.Height - thicknessOfBorder,
+                                            rectangleToDraw.Width,
+                                            thicknessOfBorder), borderColor);
+        }
+
+
+
+
+
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -75,13 +105,16 @@ namespace Flatulina
             player = new Player();
             //enemy = new Player();
 
+            // powerup init
+            powerups = new Powerup[3];
+            
 
-            collisionSolids = new List<EnvironmentSolid>();
+                collisionSolids = new List<EnvironmentSolid>();
             floor = new EnvironmentSolid();
-            tower1 = new EnvironmentSolid();
+            //tower1 = new EnvironmentSolid();
 
             collisionSolids.Add(floor);
-            collisionSolids.Add(tower1);
+            //collisionSolids.Add(tower1);
 
             base.Initialize();
         }
@@ -92,6 +125,9 @@ namespace Flatulina
         /// </summary>
         protected override void LoadContent()
         {
+
+            
+
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -100,22 +136,36 @@ namespace Flatulina
             Font1 = Content.Load<SpriteFont>("Graphics\\Courier New");
             //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
 
+            pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            pixel.SetData(new[] { Color.White }); // so that we can draw whatever color we want on top of it
+
             // Load player resources
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
             Vector2 enemyPosition = new Vector2(500, 100);
 
-            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), playerPosition);
+            player.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), new Vector2(100,200));
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
             // Set a constant player move speed
             playerMoveSpeed = 8.0f;
 
+
+
+            Texture2D powTex = Content.Load<Texture2D>("Graphics\\Powerup");
+            for (int i = 0; i < powerups.Length; i++)
+            {
+                powerups[i] = new Powerup(powTex, new Vector2(0, 0),32,32);
+            }
+            powerups[0].SetPosition(new Vector2(400, 450));
+            //powerups[1].position = new Vector2(600, 550);
+            //powerups[2].position = new Vector2(200, 550);
+
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
             floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
 
-            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
-            tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+           // Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
 
             //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
@@ -162,38 +212,99 @@ namespace Flatulina
 
         private void UpdatePlayer(GameTime gameTime)
         {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            bool moveRequest = false;
+ 
             // Get Thumbstick Controls
-            player.position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.position.Y += currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
+            player.position.Y += player.velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
             {
-                player.position.X -= playerMoveSpeed;
+                player.velocity.X -= player.accX;
+                moveRequest = true;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
             {
-                player.position.X += playerMoveSpeed;
+                player.velocity.X += player.accX;
+                moveRequest = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W) || currentGamePadState.DPad.Up == ButtonState.Pressed)
+            // JUMPING
+            if ( currentKeyboardState.IsKeyDown(Keys.Space) && !player.jumping && !player.jumpKeyDown)
             {
-                player.position.Y -= playerMoveSpeed;
+                player.jumping = true;
+                player.jumpKeyDown = true;
+                player.velocity.Y = -player.jumpVelocityY;
+            }
+            // jump key released
+            if (!currentKeyboardState.IsKeyDown(Keys.Space))
+            {
+                player.jumpKeyDown = false;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S) || currentGamePadState.DPad.Down == ButtonState.Pressed)
+            // JET FART
+            if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
             {
-                player.position.Y += playerMoveSpeed;
+                player.fuel -= 1;
+                //player.jet = true;
+                //player.jetKeyDown = true;
+                player.velocity.Y = -player.jetVelocityY;
+            }
+
+            if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
+            if (player.velocity.X < -player.maxVelocity.X) player.velocity.X = -player.maxVelocity.X;
+            if (player.velocity.Y < -player.maxVelocity.Y) player.velocity.Y = -player.maxVelocity.Y;
+
+            if (!moveRequest)
+            {
+                if (player.velocity.X < 0) player.velocity.X += player.decX;
+                if (player.velocity.X > 0) player.velocity.X -= player.decX;
+                // Deceleration may produce a speed that is greater than zero but
+                // smaller than the smallest unit of deceleration. These lines ensure
+                // that the player does not keep travelling at slow speed forever after
+                // decelerating.
+                if (player.velocity.X > 0 && player.velocity.X < player.decX) player.velocity.X = 0;
+                if (player.velocity.X < 0 && player.velocity.X > -player.decX) player.velocity.X = 0;
             }
 
             // Make sure player does not go out of bounds
+            // Temporary fix until dinal collision is added
             player.position.X = MathHelper.Clamp(player.position.X, 0, GraphicsDevice.Viewport.Width - player.Width * player.scale);
-            player.position.Y = MathHelper.Clamp(player.position.Y, 0, GraphicsDevice.Viewport.Height - player.Height * player.scale);
+            if (player.position.Y > 540)
+            {
+                player.position.Y = MathHelper.Clamp(player.position.Y, 0, 540/*GraphicsDevice.Viewport.Height - (player.Height + 350) * player.scale*/);
+                player.jumping = false;
+                player.jet = false;
+            }
+            
 
             // Update HitBox
             player.BoundingBox.X = (int)player.position.X;
             player.BoundingBox.Y = (int)player.position.Y;
+
+
+            // GRAVITY //
+            player.velocity.Y += player.accY;
+
+            //Console.WriteLine(player.jumping.ToString());
+
+            // TEMPORARY //
+           /* for (int i = 0; i < powerups.Length; i++)
+            {
+                Console.WriteLine(powerups[i].boundingBox);
+                if (player.BoundingBox.Intersects(powerups[i].boundingBox))
+                {
+                    Console.WriteLine("Intersected!");
+                    powerups[i].position = new Vector2(9999, 9999);
+                    player.fuel += 1;
+                }
+            }*/
+
+                // UPDATE FUEL HUD
+                player.fuelFill.Width = player.fuel * 2;
         }
 
         private void UpdateCollision()
@@ -203,10 +314,14 @@ namespace Flatulina
             //else
             //    player.color = Color.White;
 
-            //// Solid Environment objects
-            //if (player.HitBox.Intersects(floor.HitBox))
+
+
+            // FLOOR //
+
+            // Solid Environment objects
+            //if (player.BoundingBox.Intersects(floor.HitBox))
             //{
-            //    player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, floor.Position.Y - player.Height * player.scale);
+                //player.position.Y = MathHelper.Clamp(player.position.Y, 0, floor.Position.Y - player.Height * player.scale);
             //}
 
             // source: http://gamedev.stackexchange.com/questions/14486/2d-platformer-aabb-collision-problems/14491#14491
@@ -413,12 +528,22 @@ namespace Flatulina
             Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
             _spriteBatch.DrawString(Font1, mouseCoord, fontPosition, Color.White);
 
+            for (int i = 0; i < powerups.Length; i++)
+            {
+                _spriteBatch.Draw(powerups[i].tex, powerups[i].position, Color.White);
+            }
+
+
+
             // Draw Player
             player.Draw(_spriteBatch);
+            _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);
+            DrawBorder(player.fuelOutline, 2, Color.White); 
             //enemy.Draw(_spriteBatch);
+            
 
-            for (int i = 0; i < collisionSolids.Count; i++)
-                collisionSolids[i].Draw(_spriteBatch);
+                for (int i = 0; i < collisionSolids.Count; i++)
+                    collisionSolids[i].Draw(_spriteBatch);
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
 

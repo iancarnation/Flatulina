@@ -77,6 +77,18 @@
       <Link>Content\Graphics\tower.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\Fart.xnb">
+      <Link>Content\Sound\Fart.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\LuteSong.xnb">
+      <Link>Content\Sound\LuteSong.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\ShortSqueak.xnb">
+      <Link>Content\Sound\ShortSqueak.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

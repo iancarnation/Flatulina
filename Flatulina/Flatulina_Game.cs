@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -20,6 +22,14 @@ namespace Flatulina
     {
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
+        MediaLibrary mediaLibrary;
+        Random rand; 
+
+        //Sound Vars
+        public SoundEffect effect;
+        public SoundEffect backgroundMusic;
+        public SoundEffect squeak;
+        bool isKeyDown = false;
 
         SpriteFont Font1;
         Texture2D pixel;
@@ -46,7 +56,7 @@ namespace Flatulina
         // Mouse states used to track mouse button presses
         MouseState currentMouseState;
         MouseState previousMouseState;
-        
+
 
         // A movement speed for the player
         float playerMoveSpeed;
@@ -57,6 +67,7 @@ namespace Flatulina
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
+            mediaLibrary = new MediaLibrary(); 
             graphics.PreferredBackBufferWidth = 1024;
             graphics.PreferredBackBufferHeight = 728;
             graphics.ApplyChanges();
@@ -101,6 +112,10 @@ namespace Flatulina
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            //Loading Sound Clips
+            effect = Content.Load<SoundEffect>("Sound\\Fart");
+            backgroundMusic = Content.Load<SoundEffect>("Sound\\LuteSong");
+            squeak = Content.Load<SoundEffect>("Sound\\ShortSqueak");
 
             Font1 = Content.Load<SpriteFont>("Graphics\\Courier New");
             //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
@@ -116,7 +131,7 @@ namespace Flatulina
             player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
-         
+
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -157,6 +172,11 @@ namespace Flatulina
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
+            //BackGround music//////////SOUNDS BAD RIGHT NOW WILL EDIT
+            SoundEffectInstance soundEffectInstance = backgroundMusic.CreateInstance();
+            soundEffectInstance.Volume = 0.01f;
+            soundEffectInstance.Play(); 
+
             // Update the player
             UpdateCollision();
             UpdatePlayer(gameTime);
@@ -181,6 +201,14 @@ namespace Flatulina
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             bool moveRequest = false;
+            //Creating effect Instance
+            SoundEffectInstance soundEffect = effect.CreateInstance();
+            soundEffect.Volume = 0.01f;
+            soundEffect.IsLooped = false;
+            //Creating an instance of squeak
+            SoundEffectInstance squeakEffect = squeak.CreateInstance();
+            squeakEffect.Volume = 0.1f;
+            squeakEffect.IsLooped = false;
 
             // Get Thumbstick Controls
             player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
@@ -205,7 +233,13 @@ namespace Flatulina
                 player.jumping = true;
                 player.jumpKeyDown = true;
                 player.velocity.Y = -player.jumpVelocityY;
+                soundEffect.Play();
             }
+            if (currentKeyboardState.IsKeyUp(Keys.Space) && player.jumpKeyDown == true && soundEffect.State == SoundState.Stopped)
+            {
+                squeakEffect.Play();
+            }
+
             // jump key released
             if (!currentKeyboardState.IsKeyDown(Keys.Space))
             {
@@ -213,12 +247,18 @@ namespace Flatulina
             }
 
             // JET FART
-            if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
+            if (currentKeyboardState.IsKeyDown(Keys.Z) && !player.jetKeyDown && player.fuel > 0)
             {
                 player.fuel -= 1;
                 //player.jet = true;
                 //player.jetKeyDown = true;
                 player.velocity += player.jetForce;
+
+            }
+            if (player.jetKeyDown == true && currentKeyboardState.IsKeyDown(Keys.Z) && soundEffect.State == SoundState.Stopped)
+            {
+                soundEffect.Play();
+                player.jetKeyDown = false; 
             }
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
@@ -296,7 +336,7 @@ namespace Flatulina
 
             // HUD
             _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);
-            DrawBorder(player.fuelOutline, 2, Color.White); 
+            DrawBorder(player.fuelOutline, 2, Color.White);
 
             // draw player debug rect
             if (debugBoxesOn)

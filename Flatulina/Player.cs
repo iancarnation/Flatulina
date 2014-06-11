@@ -75,7 +75,7 @@ namespace Flatulina
         public bool jumping, jet;
 
         // True if jump key is currently held down
-        public bool jumpKeyDown, jetKeyDown;
+        public bool jumpKeyDown, jetKeyDown=false;
 
         // True if player's feet are on top of a surface
         public bool onGround;

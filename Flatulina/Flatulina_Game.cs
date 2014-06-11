@@ -31,7 +31,7 @@ namespace Flatulina
         //Player enemy;
 
         // Environment stuff
-        List<EnvironmentSolid> collisionSolids;
+        public List<EnvironmentSolid> collisionSolids;
         EnvironmentSolid floor;
         EnvironmentSolid tower1;
 
@@ -113,7 +113,7 @@ namespace Flatulina
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
             // Vector2 enemyPosition = new Vector2(500, 100);
 
-            player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
+            player.Initialize(this, Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
          
@@ -146,6 +146,12 @@ namespace Flatulina
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            // vvvvvvvvvvvvv New vvvvvvvvvvvvvvvvvvvvv
+
+
+
+
+            // vvvvvvvvvvvv Original vvvvvvvvvvvvvvvvvv
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -183,8 +189,7 @@ namespace Flatulina
             bool moveRequest = false;
 
             // Get Thumbstick Controls
-            player.Position.X += player.Velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.Position.Y += player.Velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.Position += player.Velocity * deltaTime;                     
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
@@ -247,36 +252,36 @@ namespace Flatulina
             player.UpdateBoundingBoxes();
         }
 
-        private void UpdateCollision()
-        {
-            bool hitSomething = false;
+        //private void UpdateCollision()
+        //{
+        //    bool hitSomething = false;
 
-            player.CollisionTop.DebugRectColor = Color.Red;
-            player.CollisionBottom.DebugRectColor = Color.Red;
-            player.CollisionLeft.DebugRectColor = Color.Red;
-            player.CollisionRight.DebugRectColor = Color.Red;
+        //    player.CollisionTop.DebugRectColor = Color.Red;
+        //    player.CollisionBottom.DebugRectColor = Color.Red;
+        //    player.CollisionLeft.DebugRectColor = Color.Red;
+        //    player.CollisionRight.DebugRectColor = Color.Red;
 
-            // for each of the collision solids in the environment..
-            for (int i = 0; i < collisionSolids.Count; i++)
-            {
-                //Console.WriteLine("Player" + player.BoundingBox.Position);
-                //Console.WriteLine("Solid" + collisionSolids[i].Position);
+        //    // for each of the collision solids in the environment..
+        //    for (int i = 0; i < collisionSolids.Count; i++)
+        //    {
+        //        //Console.WriteLine("Player" + player.BoundingBox.Position);
+        //        //Console.WriteLine("Solid" + collisionSolids[i].Position);
 
-                // check to see if player's general bounding box is colliding
-                if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
-                {
-                    Console.WriteLine("Bounding Box Intersection");
-                    player.BoundingBox.DebugRectColor = Color.Yellow;
-                    hitSomething = true;
+        //        // check to see if player's general bounding box is colliding
+        //        if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
+        //        {
+        //            Console.WriteLine("Bounding Box Intersection");
+        //            player.BoundingBox.DebugRectColor = Color.Yellow;
+        //            hitSomething = true;
 
-                    // run the player's collision area checks and adjust position accordingly
-                    player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
-                }
+        //            // run the player's collision area checks and adjust position accordingly
+        //            player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
+        //        }
                 
-                if (!hitSomething)    
-                    player.BoundingBox.DebugRectColor = Color.Red;
-            }
-        }
+        //        if (!hitSomething)    
+        //            player.BoundingBox.DebugRectColor = Color.Red;
+        //    }
+        //}
 
         protected override void Draw(GameTime gameTime)
         {

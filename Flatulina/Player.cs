@@ -4,6 +4,7 @@ using System.Collections.Generic;
 //using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Flatulina
 {
@@ -12,6 +13,15 @@ namespace Flatulina
         // temp
         public Color color;
         public float scale;
+
+        // Animations
+
+        // Sounds
+
+        public Game Game
+        { get { return game; } }
+        Game game;
+
 
         // >>>>>>>>> General Properties <<<<<<<<
 
@@ -24,7 +34,7 @@ namespace Flatulina
         // Get height of player
         public float Height { get { return this.height * scale; } } float height;
 
-        // >>>>>>>>> Physics Properties <<<<<<<<
+        // >>>>>>>>> Physics Properties <<<<<<<<<<<<<<<
 
         public Vector2 Position
         {
@@ -40,45 +50,67 @@ namespace Flatulina
         }
         Vector2 velocity;
 
-        // Movement Constraints
+        // >>>>>>>>> Movement Constants <<<<<<<<<<<<<<<<<
 
-        // amount of X acceleration/deceleration to apply when player moves in X / is not moving in X
-        public float accX, decX;
+        // controlling horizontal movement
+        private const float MoveAcceleration = 13000.0f;
+        private const float MaxMoveSpeed = 1750.0f;
+        private const float GroundDragFactor = 0.48f;
+        private const float AirDragFactor = 0.58f;
 
-        // amount of upward force to apply when the player first presses jump
-        public float jumpVelocityY; // ** maybe this becomes a Vec2? **
+        // controlling vertical movement
+        private const float MaxJumpTime = 0.35f;
+        private const float JumpLaunchVelocity = -3500.0f;
+        private const float GravityAcceleration = 3400.0f;
+        private const float MaxFallSpeed = 550.0f;
+        private const float JumpControlPower = 0.14f;
 
-        // maximum velocity allowed
-        public Vector2 maxVelocity;
+        // Input configuration
+        private const float MoveStickScale = 1.0f;
+        private const Buttons JumpButton = Buttons.A;
 
+        //// maximum velocity allowed
+        //public Vector2 maxVelocity;  // might need for tempering jetFart
+
+        // >>>>>>>>> Player States <<<<<<<<<<<<<<<<<
+
+        /// <summary>
+        /// Gets whether or not the player's feet are on the ground.
+        /// </summary>
+        public bool IsOnGround
+        {
+            get { return isOnGround; }
+        }
+        bool isOnGround;
+
+        /// <summary>
+        /// Current user movement input.
+        /// </summary>
+        private float movement;
+
+        // Jumping State
+
+        // True if currently jumping (prevents double jump)
+        private bool isJumping;
+        private bool wasJumping;
+        private float jumpTime;
+
+        // True if jump key is currently held down
+        public bool jumpKeyDown, jetKeyDown;
 
         // ------------ Collision Fields ------------------------
 
         // Area for broad collision detection
-        public BoundingRect BoundingBox;
+        public BoundingRect BoundingBox; // consider adding accessor that returns new BoundingRect with current position... possibly eliminates need for explicitly updating the bounding boxes, though we may still need that amongst collision steps
 
         // Specific collision areas for regions of player
         public BoundingRect CollisionTop, CollisionBottom, CollisionLeft, CollisionRight;
 
         public float thirdOfWidth, halfOfWidth, quarterOfHeight, halfOfHeight;
 
+        // >>>>>>>>>>>>>>>>>>>> Input <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        // ---------- World "Physics" Fields -------------------
-
-        // the force of gravity (Y acceleration)
-        public float gravityAccel;
-
-        // ----------- Player States ---------------------------
-
-        // True if currently jumping (prevents double jump)
-        public bool jumping, jet;
-
-        // True if jump key is currently held down
-        public bool jumpKeyDown, jetKeyDown;
-
-        // True if player's feet are on top of a surface
-        public bool onGround;
-
+        
 
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
@@ -95,22 +127,18 @@ namespace Flatulina
         // State of the player
         public bool Active;
 
-        // debug rectangle to draw
-        //public Rectangle DebugRect;
-        //public Color DebugRectColor;
-        
-
-
         // vvvvvvvvvv TRASH vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
        
         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        public void Initialize(Texture2D a_texture, Vector2 a_position )
+
+        public void Initialize(Game game, Texture2D a_texture, Vector2 a_position )
         {
             // temp
             color = Color.White;
             scale = 0.4f;
 
+            this.game = game;
 
             // set texture // ** to be animation later **
             playerTexture = a_texture;
@@ -124,27 +152,28 @@ namespace Flatulina
 
             // Set health
             
-            // desired framerate
-            float mScale = 60.0f; // ** rename? **
-
-            // Set velocity
-            Velocity = new Vector2(0.0f, 0.0f);
-            // Set accel/decel
-            accX = 0.15f * mScale;
-            decX = 0.2f * mScale;
-            // Set jump velocity
-            jumpVelocityY = 8.0f * mScale;
-            // Set jet velocity
-            jetForce = new Vector2(1.2f * mScale, -3.0f * mScale);
-            // Set max velocity
-            maxVelocity = new Vector2(3.0f * mScale, 8.0f * mScale);
-
-            // Set gravity
-            gravityAccel = 0.4f * mScale;
             
-            // Set states
-            jumping = false;
-            jumpKeyDown = false;
+            // vvvvvvvvvvvvvvvv old properties vvvvvvvvvvvvvv
+            //// Set velocity
+            //Velocity = new Vector2(0.0f, 0.0f);
+            //// Set accel/decel
+            //accX = 0.15f * mScale;
+            //decX = 0.2f * mScale;
+            //// Set jump velocity
+            //jumpVelocityY = 8.0f * mScale;
+            //// Set jet velocity
+            //jetForce = new Vector2(1.2f * mScale, -3.0f * mScale);
+            //// Set max velocity
+            //maxVelocity = new Vector2(3.0f * mScale, 8.0f * mScale);
+
+            //// Set gravity
+            //gravityAccel = 0.4f * mScale;
+            
+            //// Set states
+            //jumping = false;
+            //jumpKeyDown = false;
+
+            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
             // set collision area calculation variables
             thirdOfWidth = Width / 3f;
@@ -161,7 +190,7 @@ namespace Flatulina
             // set broad collision area
             BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
 
-            // Set the player to be Active
+            // Set the player to be Active  // ** to be removed **
             Active = true;
 
             // Set player health
@@ -175,9 +204,194 @@ namespace Flatulina
 
         }
 
-        public void Update()
+        /// <summary>
+        /// Handles input, performs physics, and animates the player sprite.
+        /// </summary>
+        /// <remarks>
+        /// We pass in all of the input states so that our game is only polling the hardware once per frame. 
+
+        /// </remarks>
+        public void Update(
+            GameTime gameTime, 
+            KeyboardState keyboardState,
+            GamePadState gamePadState,
+            DisplayOrientation orientation) 
         {
- 
+            GetInput(keyboardState, gamePadState);
+
+            ApplyPhysics(gameTime);
+
+            // check if alive and on ground -> play run/idle animation
+
+            // Clear input
+            
+        }
+
+        /// <summary>
+        /// Gets player horizontal movement and jump commands from input.
+        /// </summary>
+        private void GetInput(
+            KeyboardState keyboardState,
+            GamePadState gamePadState)
+        {
+            // get analog horizontal movement
+            //movement = gamePadState.ThumbSticks.Left.X * MoveStickScale;
+
+            // Ignore small movements to prevent running in place
+            if (Math.Abs(movement) < 0.5f)
+                movement = 0.0f;
+
+            // Check for digital horizontal input
+            if (gamePadState.IsButtonDown(Buttons.DPadLeft) ||
+                keyboardState.IsKeyDown(Keys.Left) ||
+                keyboardState.IsKeyDown(Keys.A))
+            {
+                movement = -1.0f;
+            }
+            else if (gamePadState.IsButtonDown(Buttons.DPadRight) ||
+                    keyboardState.IsKeyDown(Keys.Right) ||
+                    keyboardState.IsKeyDown(Keys.D))
+            {
+                movement = 1.0f;
+            }
+
+            // Check if the player wants to jump
+            isJumping =
+                /*gamePadState.IsButtonDown(JumpButton) ||*/
+                keyboardState.IsKeyDown(Keys.Space) ||
+                keyboardState.IsKeyDown(Keys.Up) ||
+                keyboardState.IsKeyDown(Keys.W);
+           
+        }
+
+        /// <summary>
+        /// Updates the player's velocity and position based on input, gravity, etc.
+        /// </summary>
+        public void ApplyPhysics(GameTime gameTime)
+        {
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Vector2 previousPosition = Position;
+
+            // Base velocity is a combination of horizontal movement control and
+            // acceleration downward due to gravity
+            velocity.X += movement * MoveAcceleration * elapsed;
+            velocity.Y = MathHelper.Clamp(velocity.Y + GravityAcceleration * elapsed, -MaxFallSpeed, MaxFallSpeed);
+
+            velocity.Y = DoJump(velocity.Y, gameTime);
+
+            // Apply pswudo-drag horizontally
+            if (IsOnGround)
+                velocity.X *= GroundDragFactor;
+            else
+                velocity.X *= AirDragFactor;
+
+            // Prevent the player from running faster than this top speed
+            velocity.X = MathHelper.Clamp(velocity.X, -MaxMoveSpeed, MaxMoveSpeed);
+
+            // Apply velocity
+            Position += velocity * elapsed;
+
+            // If the player is now colliding with the level, separate them
+            HandleCollisions();
+
+            // If the collision stopped us from moving, reset velocity to zero
+            if (Position.X == previousPosition.X)
+                velocity.X = 0f;
+            if (Position.Y == previousPosition.Y)
+                velocity.Y = 0f;
+        }
+
+        /// <summary>
+        /// Calculates the Y velocity accounting for jumping and
+        /// animates accordingly.
+        /// </summary>
+        /// <remarks>
+        /// During the accent of a jump, the Y velocity is completely
+        /// overridden by a power curve. During the decent, gravity takes
+        /// over. The jump velocity is controlled by the jumpTime field
+        /// which measures time into the accent of the current jump.
+        /// </remarks>
+        /// <param name="velocityY">
+        /// The player's current velocity along the Y axis.
+        /// </param>
+        /// <returns>
+        /// A new Y velocity if beginning or continuing a jump.
+        /// Otherwise, the existing Y velocity.
+        /// </returns>
+        private float DoJump(float velocityY, GameTime gameTime)
+        {
+            // If the player wants to jump
+            if (isJumping)
+            {
+                // Begin or continue a jump
+                if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
+                {
+                    if (jumpTime == 0.0f)
+                        // play jump sound
+
+                        jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    // play jump animation
+                }
+
+                // If we are in the ascent of the jump
+                if (0.0f < jumpTime && jumpTime <= MaxJumpTime)
+                {
+                    // Fully override the vertical velocity with a power curve that gives players more control over the top of the jump
+                    velocityY = JumpLaunchVelocity * (1.0f - (float)Math.Pow(jumpTime / MaxJumpTime, JumpControlPower));
+                }
+                else
+                {
+                    // Reached the apex of the jump
+                    jumpTime = 0.0f;
+                }
+            }
+            else 
+            {
+                // Continues not jumping or cancels a jump in progress
+                jumpTime = 0.0f;
+            }
+            wasJumping = isJumping;
+
+            return velocityY;
+        }
+
+        /// <summary>
+        /// Detects and resolves all collisions between the player and his environment
+        /// </summary>
+        private void HandleCollisions()
+        {
+            // Reset flag to search for ground collision.
+            isOnGround = false;
+
+            // for the debug box
+            bool hitSomething = false;
+
+            CollisionTop.DebugRectColor = Color.Red;
+            CollisionBottom.DebugRectColor = Color.Red;
+            CollisionLeft.DebugRectColor = Color.Red;
+            CollisionRight.DebugRectColor = Color.Red;
+
+            // for each of the collision solids in the environment..
+            for (int i = 0; i < Game.collisionSolids.Count; i++)
+            {
+                //Console.WriteLine("Player" + player.BoundingBox.Position);
+                //Console.WriteLine("Solid" + collisionSolids[i].Position);
+
+                // check to see if player's general bounding box is colliding
+                if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
+                {
+                    Console.WriteLine("Bounding Box Intersection");
+                    player.BoundingBox.DebugRectColor = Color.Yellow;
+                    hitSomething = true;
+
+                    // run the player's collision area checks and adjust position accordingly
+                    player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
+                }
+
+                if (!hitSomething)
+                    player.BoundingBox.DebugRectColor = Color.Red;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

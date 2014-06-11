@@ -218,7 +218,7 @@ namespace Flatulina
                 player.fuel -= 1;
                 //player.jet = true;
                 //player.jetKeyDown = true;
-                player.velocity.Y -= player.jetVelocityY;
+                player.velocity += player.jetForce;
             }
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;

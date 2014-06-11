@@ -84,7 +84,7 @@ namespace Flatulina
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
 
-        public float jetVelocityY;
+        public Vector2 jetForce;
 
         public Rectangle fuelOutline, fuelFill; // for drawing fuel meter
 
@@ -134,7 +134,7 @@ namespace Flatulina
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
             // Set jet velocity
-            jetVelocityY = 3.0f * mScale;
+            jetForce = new Vector2(1.2f * mScale, -3.0f * mScale);
             // Set max velocity
             maxVelocity = new Vector2(3.0f * mScale, 8.0f * mScale);
 

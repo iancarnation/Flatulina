@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -21,6 +22,8 @@ namespace Flatulina
     {
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
+        MediaLibrary mediaLibrary;
+        Random rand; 
 
         //Sound Vars
         public SoundEffect effect;
@@ -62,6 +65,7 @@ namespace Flatulina
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
+            mediaLibrary = new MediaLibrary(); 
             graphics.PreferredBackBufferWidth = 1024;
             graphics.PreferredBackBufferHeight = 728;
             graphics.ApplyChanges();
@@ -166,8 +170,8 @@ namespace Flatulina
 
             //BackGround music//////////SOUNDS BAD RIGHT NOW WILL EDIT
             SoundEffectInstance soundEffectInstance = backgroundMusic.CreateInstance();
-            soundEffectInstance.Volume = 0.02f;
-            //soundEffectInstance.Play(); 
+            soundEffectInstance.Volume = 0.01f;
+            soundEffectInstance.Play(); 
 
             // Update the player
             UpdateCollision();
@@ -232,13 +236,17 @@ namespace Flatulina
             }
 
             // JET FART
-            if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
+            if (currentKeyboardState.IsKeyDown(Keys.Z) && !player.jetKeyDown && player.fuel > 0)
             {
                 player.fuel -= 1;
                 //player.jet = true;
-                //player.jetKeyDown = true;
+                player.jetKeyDown = true;
                 player.velocity.Y = -player.jetVelocityY;
-
+            }
+            if (player.jetKeyDown == true && currentKeyboardState.IsKeyDown(Keys.Z) && soundEffect.State == SoundState.Stopped)
+            {
+                soundEffect.Play();
+                player.jetKeyDown = false; 
             }
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;

@@ -136,7 +136,7 @@ namespace Flatulina
             // Set jet velocity
             jetVelocityY = 3.0f * mScale;
             // Set max velocity
-            maxVelocity = new Vector2(3.0f * mScale, 12.0f * mScale);
+            maxVelocity = new Vector2(3.0f * mScale, 8.0f * mScale);
 
             // Set gravity
             gravityAccel = 0.4f * mScale;
@@ -206,7 +206,10 @@ namespace Flatulina
                 CollisionBottom.DebugRectColor = Color.Green;
                 position.Y = solidRect.Position.Y - this.Height - 1;
                 if (this.velocity.Y > 0f)
+                {
                     this.velocity.Y = 0f;
+                    this.onGround = true;
+                }
             }
             else
                 CollisionBottom.DebugRectColor = Color.Red;
@@ -218,7 +221,8 @@ namespace Flatulina
                 position.X = solidRect.Position.X + solidRect.Width;
                 if (this.velocity.X < 0f)
                     this.velocity.X = 0f;
-                this.onGround = true;
+                
+               
             }
             else
                 CollisionLeft.DebugRectColor = Color.Red;

@@ -69,6 +69,10 @@
       <Link>Content\Graphics\floor.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\powerUp.xnb">
+      <Link>Content\Graphics\powerUp.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tempCherub.xnb">
       <Link>Content\Graphics\tempCherub.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

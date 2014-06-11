@@ -28,8 +28,13 @@ namespace Flatulina
         //Sound Vars
         public SoundEffect effect;
         public SoundEffect backgroundMusic;
+        bool songStart = false; 
         public SoundEffect squeak;
-        bool isKeyDown = false;
+        bool isSoundPlaying = false;
+
+        //PowerUp Vars
+        Powerup powerUp; 
+        
 
         SpriteFont Font1;
         Texture2D pixel;
@@ -88,7 +93,8 @@ namespace Flatulina
             // Initialize the player class
             player = new Player();
             //enemy = new Player();
-
+            //PowerUp
+            powerUp = new Powerup(); 
 
             collisionSolids = new List<EnvironmentSolid>();
             floor = new EnvironmentSolid();
@@ -130,8 +136,11 @@ namespace Flatulina
 
             player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
-
-
+            
+            //Initialize PowerUps
+            powerUp.position = new Vector2(200, -200);
+            powerUp.tex = Content.Load<Texture2D>("Graphics\\powerUp"); 
+           
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -173,9 +182,14 @@ namespace Flatulina
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
             //BackGround music//////////SOUNDS BAD RIGHT NOW WILL EDIT
-            SoundEffectInstance soundEffectInstance = backgroundMusic.CreateInstance();
-            soundEffectInstance.Volume = 0.01f;
-            soundEffectInstance.Play(); 
+            if (!songStart)
+            {
+                SoundEffectInstance backgroundInstance = backgroundMusic.CreateInstance();
+                backgroundInstance.IsLooped = true;
+                backgroundInstance.Volume = 0.01f; 
+                backgroundInstance.Play(); 
+            }
+
 
             // Update the player
             UpdateCollision();
@@ -247,18 +261,23 @@ namespace Flatulina
             }
 
             // JET FART
-            if (currentKeyboardState.IsKeyDown(Keys.Z) && !player.jetKeyDown && player.fuel > 0)
+            if (currentKeyboardState.IsKeyDown(Keys.Z) && player.fuel > 0)
             {
                 player.fuel -= 1;
                 //player.jet = true;
                 //player.jetKeyDown = true;
                 player.velocity += player.jetForce;
-
             }
-            if (player.jetKeyDown == true && currentKeyboardState.IsKeyDown(Keys.Z) && soundEffect.State == SoundState.Stopped)
+            if (currentKeyboardState.IsKeyDown(Keys.Z) && isSoundPlaying == false)
             {
+                
                 soundEffect.Play();
-                player.jetKeyDown = false; 
+                //player.jetKeyDown = false;
+                isSoundPlaying = true; 
+            }
+            if (currentKeyboardState.IsKeyUp(Keys.Z))
+            {
+                isSoundPlaying = false; 
             }
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
@@ -333,6 +352,9 @@ namespace Flatulina
 
             // Draw Player
             player.Draw(_spriteBatch);
+
+            //powerUp Draw
+            powerUp.Draw(_spriteBatch); 
 
             // HUD
             _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);

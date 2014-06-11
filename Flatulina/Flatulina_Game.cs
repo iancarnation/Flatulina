@@ -29,9 +29,11 @@ namespace Flatulina
         // Represents player
         Player player;
         //Player enemy;
+        Enemy enemy;
 
         // Environment stuff
         List<EnvironmentSolid> collisionSolids;
+        List<Enemy> enemies;
         EnvironmentSolid floor;
         EnvironmentSolid tower1;
 
@@ -77,14 +79,23 @@ namespace Flatulina
             // Initialize the player class
             player = new Player();
             //enemy = new Player();
+            enemy = new Enemy();
 
 
             collisionSolids = new List<EnvironmentSolid>();
+            enemies = new List<Enemy>();
             floor = new EnvironmentSolid();
             tower1 = new EnvironmentSolid();
 
             collisionSolids.Add(floor);
             collisionSolids.Add(tower1);
+
+            enemies.Add(enemy);
+            enemies.Add(enemy);
+
+            enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
+            enemies[1].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(200, 0));
+
 
             debugBoxesOn = true;
 
@@ -115,6 +126,9 @@ namespace Flatulina
 
             player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
+            
+            // set enemy patrol
+            enemies[0].SetPath(new Vector2(600,570), new Vector2(900,570), new Vector2(700,570));
 
          
 
@@ -146,6 +160,7 @@ namespace Flatulina
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -160,6 +175,13 @@ namespace Flatulina
             // Update the player
             UpdateCollision();
             UpdatePlayer(gameTime);
+
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                enemies[i].Update(deltaTime);
+            }
+            
+            
 
             // debug options
             // toggle bounding boxes
@@ -276,6 +298,12 @@ namespace Flatulina
                 if (!hitSomething)    
                     player.BoundingBox.DebugRectColor = Color.Red;
             }
+
+            // TEMPORARY /////////////////////////////////////////////
+            if (player.BoundingBox.Intersects(enemies[0].boundingBox))
+            {
+                player.position = new Vector2(9999,9999);
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -306,9 +334,21 @@ namespace Flatulina
                 DrawBorder(player.CollisionBottom.DebugRect, 1, player.CollisionBottom.DebugRectColor);
                 DrawBorder(player.CollisionLeft.DebugRect, 1, player.CollisionLeft.DebugRectColor);
                 DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
+
+                // enemy
+                for (int i = 0; i < enemies.Count; i++)
+                {
+                    DrawBorder(enemies[i].boundingBox.DebugRect, 2, Color.Red);
+                }
+                    
             }
 
             //enemy.Draw(_spriteBatch);
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                enemies[i].Draw(_spriteBatch);
+            }
+            
 
             for (int i = 0; i < collisionSolids.Count; i++)
             {
@@ -320,6 +360,8 @@ namespace Flatulina
             }
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
+
+            
 
             _spriteBatch.End();
 

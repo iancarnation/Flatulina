@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -20,6 +21,12 @@ namespace Flatulina
     {
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
+
+        //Sound Vars
+        public SoundEffect effect;
+        public SoundEffect backgroundMusic;
+        public SoundEffect squeak;
+        bool isKeyDown = false;
 
         SpriteFont Font1;
         Texture2D pixel;
@@ -44,7 +51,7 @@ namespace Flatulina
         // Mouse states used to track mouse button presses
         MouseState currentMouseState;
         MouseState previousMouseState;
-        
+
 
         // A movement speed for the player
         float playerMoveSpeed;
@@ -97,6 +104,10 @@ namespace Flatulina
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            //Loading Sound Clips
+            effect = Content.Load<SoundEffect>("Sound\\Fart");
+            backgroundMusic = Content.Load<SoundEffect>("Sound\\LuteSong");
+            squeak = Content.Load<SoundEffect>("Sound\\ShortSqueak");
 
             Font1 = Content.Load<SpriteFont>("Graphics\\Courier New");
             //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
@@ -112,7 +123,7 @@ namespace Flatulina
             player.Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
-         
+
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -153,10 +164,15 @@ namespace Flatulina
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
+            //BackGround music//////////SOUNDS BAD RIGHT NOW WILL EDIT
+            SoundEffectInstance soundEffectInstance = backgroundMusic.CreateInstance();
+            soundEffectInstance.Volume = 0.02f;
+            //soundEffectInstance.Play(); 
+
             // Update the player
             UpdateCollision();
             UpdatePlayer(gameTime);
-            
+
             base.Update(gameTime);
         }
 
@@ -170,6 +186,14 @@ namespace Flatulina
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             bool moveRequest = false;
+            //Creating effect Instance
+            SoundEffectInstance soundEffect = effect.CreateInstance();
+            soundEffect.Volume = 0.01f;
+            soundEffect.IsLooped = false;
+            //Creating an instance of squeak
+            SoundEffectInstance squeakEffect = squeak.CreateInstance();
+            squeakEffect.Volume = 0.1f;
+            squeakEffect.IsLooped = false;
 
             // Get Thumbstick Controls
             player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
@@ -194,7 +218,13 @@ namespace Flatulina
                 player.jumping = true;
                 player.jumpKeyDown = true;
                 player.velocity.Y = -player.jumpVelocityY;
+                soundEffect.Play();
             }
+            if (currentKeyboardState.IsKeyUp(Keys.Space) && player.jumpKeyDown == true && soundEffect.State == SoundState.Stopped)
+            {
+                squeakEffect.Play();
+            }
+
             // jump key released
             if (!currentKeyboardState.IsKeyDown(Keys.Space))
             {
@@ -208,6 +238,7 @@ namespace Flatulina
                 //player.jet = true;
                 //player.jetKeyDown = true;
                 player.velocity.Y = -player.jetVelocityY;
+
             }
 
             if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
@@ -273,26 +304,26 @@ namespace Flatulina
             }
         }
 
-       // private void UpdateCollisionOld()
+        // private void UpdateCollisionOld()
         //{
-            //if (player.HitBox.Intersects(enemy.HitBox))
-            //    player.color = Color.Red;
-            //else
-            //    player.color = Color.White;
+        //if (player.HitBox.Intersects(enemy.HitBox))
+        //    player.color = Color.Red;
+        //else
+        //    player.color = Color.White;
 
-            //// Solid Environment objects
-            //if (player.HitBox.Intersects(floor.HitBox))
-            //{
-            //    player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, floor.Position.Y - player.Height * player.scale);
-            //}
-
-            
+        //// Solid Environment objects
+        //if (player.HitBox.Intersects(floor.HitBox))
+        //{
+        //    player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, floor.Position.Y - player.Height * player.scale);
+        //}
 
 
 
-            // vvvvvvvvvvvvvvvvvvvv Old Collision Attempt vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+
+        // vvvvvvvvvvvvvvvvvvvv Old Collision Attempt vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         //    // source: http://gamedev.stackexchange.com/questions/14486/2d-platformer-aabb-collision-problems/14491#14491
-        
+
         //    // This loop repeats until player has been fully pushed outside of all collision objects
         //    while (StillCollidingWithEnvironment(player))
         //    {
@@ -504,7 +535,7 @@ namespace Flatulina
 
             // HUD
             _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);
-            DrawBorder(player.fuelOutline, 2, Color.White); 
+            DrawBorder(player.fuelOutline, 2, Color.White);
 
             // draw player debug rect
             DrawBorder(player.BoundingBox.DebugRect, 2, player.BoundingBox.DebugRectColor);

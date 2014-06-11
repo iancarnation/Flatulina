@@ -77,11 +77,14 @@ namespace Flatulina
         // True if jump key is currently held down
         public bool jumpKeyDown, jetKeyDown;
 
+        // True if player's feet are on top of a surface
+        public bool onGround;
+
 
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
 
-        public float jetVelocityY;
+        public Vector2 jetForce;
 
         public Rectangle fuelOutline, fuelFill; // for drawing fuel meter
 
@@ -131,9 +134,9 @@ namespace Flatulina
             // Set jump velocity
             jumpVelocityY = 8.0f * mScale;
             // Set jet velocity
-            jetVelocityY = 4.0f * mScale;
+            jetForce = new Vector2(1.2f * mScale, -3.0f * mScale);
             // Set max velocity
-            maxVelocity = new Vector2(3.0f * mScale, 12.0f * mScale);
+            maxVelocity = new Vector2(3.0f * mScale, 8.0f * mScale);
 
             // Set gravity
             gravityAccel = 0.4f * mScale;
@@ -191,6 +194,8 @@ namespace Flatulina
                 Console.WriteLine("Top Hit");
                 CollisionTop.DebugRectColor = Color.Green;
                 position.Y = solidRect.Position.Y - Height;
+                if (this.velocity.Y < 0f)
+                    this.velocity.Y = 0f;
             }
             else
                 CollisionTop.DebugRectColor = Color.Red;
@@ -199,7 +204,12 @@ namespace Flatulina
             {
                 Console.WriteLine("Bottom Hit");
                 CollisionBottom.DebugRectColor = Color.Green;
-                position.Y = solidRect.Position.Y - this.Height - 5;
+                position.Y = solidRect.Position.Y - this.Height - 1;
+                if (this.velocity.Y > 0f)
+                {
+                    this.velocity.Y = 0f;
+                    this.onGround = true;
+                }
             }
             else
                 CollisionBottom.DebugRectColor = Color.Red;
@@ -209,6 +219,10 @@ namespace Flatulina
                 Console.WriteLine("Left Hit");
                 CollisionLeft.DebugRectColor = Color.Green;
                 position.X = solidRect.Position.X + solidRect.Width;
+                if (this.velocity.X < 0f)
+                    this.velocity.X = 0f;
+                
+               
             }
             else
                 CollisionLeft.DebugRectColor = Color.Red;
@@ -217,6 +231,8 @@ namespace Flatulina
             {
                 Console.WriteLine("Right Hit");
                 CollisionRight.DebugRectColor = Color.Green;
+                if (this.velocity.X > 0f)
+                    this.velocity.X = 0f;
                 position.X = solidRect.Position.X - Width;
             }
             else

@@ -183,19 +183,19 @@ namespace Flatulina
             bool moveRequest = false;
 
             // Get Thumbstick Controls
-            player.position.X += player.velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.position.Y += player.velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
+            player.Position.X += player.Velocity.X * deltaTime;           //currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
+            player.Position.Y += player.Velocity.Y * deltaTime;            //currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
 
             // Use the keyboard / dpad
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
             {
-                player.velocity.X -= player.accX;
+                player.Velocity.X -= player.accX;
                 moveRequest = true;
             }
 
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
             {
-                player.velocity.X += player.accX;
+                player.Velocity.X += player.accX;
                 moveRequest = true;
             }
 
@@ -204,7 +204,7 @@ namespace Flatulina
             {
                 player.jumping = true;
                 player.jumpKeyDown = true;
-                player.velocity.Y = -player.jumpVelocityY;
+                player.Velocity.Y = -player.jumpVelocityY;
             }
             // jump key released
             if (!currentKeyboardState.IsKeyDown(Keys.Space))
@@ -218,27 +218,27 @@ namespace Flatulina
                 player.fuel -= 1;
                 //player.jet = true;
                 //player.jetKeyDown = true;
-                player.velocity += player.jetForce;
+                player.Velocity += player.jetForce;
             }
 
-            if (player.velocity.X > player.maxVelocity.X) player.velocity.X = player.maxVelocity.X;
-            if (player.velocity.X < -player.maxVelocity.X) player.velocity.X = -player.maxVelocity.X;
-            if (player.velocity.Y < -player.maxVelocity.Y) player.velocity.Y = -player.maxVelocity.Y;
+            if (player.Velocity.X > player.maxVelocity.X) player.Velocity.X = player.maxVelocity.X;
+            if (player.Velocity.X < -player.maxVelocity.X) player.Velocity.X = -player.maxVelocity.X;
+            if (player.Velocity.Y < -player.maxVelocity.Y) player.Velocity.Y = -player.maxVelocity.Y;
 
             if (!moveRequest)
             {
-                if (player.velocity.X < 0) player.velocity.X += player.decX;
-                if (player.velocity.X > 0) player.velocity.X -= player.decX;
+                if (player.Velocity.X < 0) player.Velocity.X += player.decX;
+                if (player.Velocity.X > 0) player.Velocity.X -= player.decX;
                 // Deceleration may produce a speed that is greater than zero but
                 // smaller than the smallest unit of deceleration. These lines ensure
                 // that the player does not keep travelling at slow speed forever after
                 // decelerating.
-                if (player.velocity.X > 0 && player.velocity.X < player.decX) player.velocity.X = 0;
-                if (player.velocity.X < 0 && player.velocity.X > -player.decX) player.velocity.X = 0;
+                if (player.Velocity.X > 0 && player.Velocity.X < player.decX) player.Velocity.X = 0;
+                if (player.Velocity.X < 0 && player.Velocity.X > -player.decX) player.Velocity.X = 0;
             }
 
             // GRAVITY //
-            player.velocity.Y += player.gravityAccel;
+            player.Velocity.Y += player.gravityAccel;
 
             // UPDATE FUEL HUD
             player.fuelFill.Width = player.fuel * 2;

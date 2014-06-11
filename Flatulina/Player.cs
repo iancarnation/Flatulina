@@ -13,32 +13,34 @@ namespace Flatulina
         public Color color;
         public float scale;
 
-        // ------------ General Fields ------------------------
+        // >>>>>>>>> General Properties <<<<<<<<
 
         // Texture representing the player // ** to be an Animation later **
         public Texture2D playerTexture;
 
-        // Position of the Player (relative to the upper left side of the screen)
-        public Vector2 position;
-
-        // original dimensions of player texture
-        public float width, height;
-
-        // Amount of hit points 
-        public int health;
-
-        // >>>>>>>>> General Properties <<<<<<<<
-
         // Get width of player 
-        public float Width { get { return this.width * scale; } }
+        public float Width { get { return this.width * scale; } } float width;
 
         // Get height of player
-        public float Height { get { return this.height * scale; } }
+        public float Height { get { return this.height * scale; } } float height;
 
+        // >>>>>>>>> Physics Properties <<<<<<<<
 
-        // ------------ Movement Fields ------------------------
+        public Vector2 Position
+        {
+            get { return position; }
+            set { position = value; }
+        } 
+        Vector2 position;
 
-        public Vector2 velocity;
+        public Vector2 Velocity
+        {
+            get { return velocity; }
+            set { velocity = value; }
+        }
+        Vector2 velocity;
+
+        // Movement Constraints
 
         // amount of X acceleration/deceleration to apply when player moves in X / is not moving in X
         public float accX, decX;
@@ -48,9 +50,6 @@ namespace Flatulina
 
         // maximum velocity allowed
         public Vector2 maxVelocity;
-
-        // >>>>>>>>> Movement Properties <<<<<<<<
-
 
 
         // ------------ Collision Fields ------------------------
@@ -90,6 +89,8 @@ namespace Flatulina
 
         public int fuel;
 
+        // Amount of hit points 
+        public int health;
 
         // State of the player
         public bool Active;
@@ -115,7 +116,7 @@ namespace Flatulina
             playerTexture = a_texture;
 
             // Set starting position
-            position = a_position;
+            Position = a_position;
 
             // original width and height of texture
             width = playerTexture.Width;
@@ -127,7 +128,7 @@ namespace Flatulina
             float mScale = 60.0f; // ** rename? **
 
             // Set velocity
-            velocity = new Vector2(0.0f, 0.0f);
+            Velocity = new Vector2(0.0f, 0.0f);
             // Set accel/decel
             accX = 0.15f * mScale;
             decX = 0.2f * mScale;
@@ -152,10 +153,10 @@ namespace Flatulina
             halfOfHeight = Height / 2f;
 
             // set smaller collision areas
-            CollisionTop = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y - 5f, thirdOfWidth, quarterOfHeight + 10f);
-            CollisionBottom = new BoundingRect(this.position.X + thirdOfWidth, this.position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight + 5f);
-            CollisionLeft = new BoundingRect(this.position.X, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
-            CollisionRight = new BoundingRect(this.position.X + halfOfWidth, this.position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionTop = new BoundingRect(this.Position.X + thirdOfWidth, this.Position.Y - 5f, thirdOfWidth, quarterOfHeight + 10f);
+            CollisionBottom = new BoundingRect(this.Position.X + thirdOfWidth, this.Position.Y + quarterOfHeight * 3f, thirdOfWidth, quarterOfHeight + 5f);
+            CollisionLeft = new BoundingRect(this.Position.X, this.Position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
+            CollisionRight = new BoundingRect(this.Position.X + halfOfWidth, this.Position.Y + quarterOfHeight, halfOfWidth, halfOfHeight);
 
             // set broad collision area
             BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
@@ -181,7 +182,7 @@ namespace Flatulina
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(playerTexture, position, null, color, 0f, Vector2.Zero, scale , SpriteEffects.None, 0f);
+            spriteBatch.Draw(playerTexture, Position, null, color, 0f, Vector2.Zero, scale , SpriteEffects.None, 0f);
         }
 
         public void HandleCollisionWithSolid(BoundingRect solidRect)
@@ -193,9 +194,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Top Hit");
                 CollisionTop.DebugRectColor = Color.Green;
-                position.Y = solidRect.Position.Y - Height;
-                if (this.velocity.Y < 0f)
-                    this.velocity.Y = 0f;
+                Position.Y = solidRect.Position.Y - Height;
+                if (this.Velocity.Y < 0f)
+                    this.Velocity.Y = 0f;
             }
             else
                 CollisionTop.DebugRectColor = Color.Red;
@@ -204,10 +205,10 @@ namespace Flatulina
             {
                 Console.WriteLine("Bottom Hit");
                 CollisionBottom.DebugRectColor = Color.Green;
-                position.Y = solidRect.Position.Y - this.Height - 1;
-                if (this.velocity.Y > 0f)
+                Position.Y = solidRect.Position.Y - this.Height - 1;
+                if (this.Velocity.Y > 0f)
                 {
-                    this.velocity.Y = 0f;
+                    this.Velocity.Y = 0f;
                     this.onGround = true;
                 }
             }
@@ -218,9 +219,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Left Hit");
                 CollisionLeft.DebugRectColor = Color.Green;
-                position.X = solidRect.Position.X + solidRect.Width;
-                if (this.velocity.X < 0f)
-                    this.velocity.X = 0f;
+                Position.X = solidRect.Position.X + solidRect.Width;
+                if (this.Velocity.X < 0f)
+                    this.Velocity.X = 0f;
                 
                
             }
@@ -231,9 +232,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Right Hit");
                 CollisionRight.DebugRectColor = Color.Green;
-                if (this.velocity.X > 0f)
-                    this.velocity.X = 0f;
-                position.X = solidRect.Position.X - Width;
+                if (this.Velocity.X > 0f)
+                    this.Velocity.X = 0f;
+                Position.X = solidRect.Position.X - Width;
             }
             else
                 CollisionRight.DebugRectColor = Color.Red;
@@ -243,12 +244,12 @@ namespace Flatulina
         // Update Bounding Box and Collision Areas
         public void UpdateBoundingBoxes()
         {
-            this.BoundingBox.UpdatePosition(new Vector2(this.position.X, this.position.Y - 5f));
+            this.BoundingBox.UpdatePosition(new Vector2(this.Position.X, this.Position.Y - 5f));
 
-            this.CollisionTop.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y - 5f));
-            this.CollisionBottom.UpdatePosition(new Vector2(this.position.X + this.thirdOfWidth, this.position.Y + this.quarterOfHeight * 3f));
-            this.CollisionLeft.UpdatePosition(new Vector2(this.position.X, this.position.Y + this.quarterOfHeight));
-            this.CollisionRight.UpdatePosition(new Vector2(this.position.X + this.halfOfWidth, this.position.Y + this.quarterOfHeight));
+            this.CollisionTop.UpdatePosition(new Vector2(this.Position.X + this.thirdOfWidth, this.Position.Y - 5f));
+            this.CollisionBottom.UpdatePosition(new Vector2(this.Position.X + this.thirdOfWidth, this.Position.Y + this.quarterOfHeight * 3f));
+            this.CollisionLeft.UpdatePosition(new Vector2(this.Position.X, this.Position.Y + this.quarterOfHeight));
+            this.CollisionRight.UpdatePosition(new Vector2(this.Position.X + this.halfOfWidth, this.Position.Y + this.quarterOfHeight));
         }
 
     }

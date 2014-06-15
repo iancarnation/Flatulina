@@ -49,7 +49,7 @@ namespace Flatulina
         
 
         // A movement speed for the player
-        float playerMoveSpeed;
+        //float playerMoveSpeed;
 
         //private Texture2D flatulina;
 
@@ -147,13 +147,11 @@ namespace Flatulina
         protected override void Update(GameTime gameTime)
         {
             // vvvvvvvvvvvvv New vvvvvvvvvvvvvvvvvvvvv
-
-
-
-
-            // vvvvvvvvvvvv Original vvvvvvvvvvvvvvvvvv
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            // Update the player
+            player.Update(gameTime, currentKeyboardState, currentGamePadState);
 
             // Save the previous state of the keyboard and game pad so we can determine single key/button presses
             previousGamePadState = currentGamePadState;
@@ -163,18 +161,37 @@ namespace Flatulina
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
-            // Update the player
-            UpdateCollision();
-            UpdatePlayer(gameTime);
-
-            // debug options
-            // toggle bounding boxes
             if (currentKeyboardState.IsKeyDown(Keys.B))
             {
                 debugBoxesOn = !debugBoxesOn;
             }
-            
+
             base.Update(gameTime);
+
+            // vvvvvvvvvvvv Original vvvvvvvvvvvvvvvvvv
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            //    Exit();
+
+            //// Save the previous state of the keyboard and game pad so we can determine single key/button presses
+            //previousGamePadState = currentGamePadState;
+            //previousKeyboardState = currentKeyboardState;
+
+            //// Read the current state of the keyboard and gamepad and store it
+            //currentKeyboardState = Keyboard.GetState();
+            //currentGamePadState = GamePad.GetState(PlayerIndex.One);
+
+            
+            //UpdateCollision();
+            //UpdatePlayer(gameTime);
+
+            // debug options
+            // toggle bounding boxes
+            //if (currentKeyboardState.IsKeyDown(Keys.B))
+            //{
+            //    debugBoxesOn = !debugBoxesOn;
+            //}
+            
+            //base.Update(gameTime);
         }
 
         /// <summary>
@@ -183,74 +200,74 @@ namespace Flatulina
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         /// 
 
-        private void UpdatePlayer(GameTime gameTime)
-        {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            bool moveRequest = false;
+        //private void UpdatePlayer(GameTime gameTime)
+        //{
+        //    float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        //    bool moveRequest = false;
 
-            // Get Thumbstick Controls
-            player.Position += player.Velocity * deltaTime;                     
+        //    // Get Thumbstick Controls
+        //    player.Position += player.Velocity * deltaTime;                     
 
-            // Use the keyboard / dpad
-            if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
-            {
-                player.Velocity.X -= player.accX;
-                moveRequest = true;
-            }
+        //    // Use the keyboard / dpad
+        //    if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
+        //    {
+        //        player.Velocity.X -= player.accX;
+        //        moveRequest = true;
+        //    }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
-            {
-                player.Velocity.X += player.accX;
-                moveRequest = true;
-            }
+        //    if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
+        //    {
+        //        player.Velocity.X += player.accX;
+        //        moveRequest = true;
+        //    }
 
-            // JUMPING
-            if (currentKeyboardState.IsKeyDown(Keys.Space) && player.onGround /*&& !player.jumping*/ && !player.jumpKeyDown)
-            {
-                player.jumping = true;
-                player.jumpKeyDown = true;
-                player.Velocity.Y = -player.jumpVelocityY;
-            }
-            // jump key released
-            if (!currentKeyboardState.IsKeyDown(Keys.Space))
-            {
-                player.jumpKeyDown = false;
-            }
+        //    // JUMPING
+        //    if (currentKeyboardState.IsKeyDown(Keys.Space) && player.onGround /*&& !player.jumping*/ && !player.jumpKeyDown)
+        //    {
+        //        player.jumping = true;
+        //        player.jumpKeyDown = true;
+        //        player.Velocity.Y = -player.jumpVelocityY;
+        //    }
+        //    // jump key released
+        //    if (!currentKeyboardState.IsKeyDown(Keys.Space))
+        //    {
+        //        player.jumpKeyDown = false;
+        //    }
 
-            // JET FART
-            if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
-            {
-                player.fuel -= 1;
-                //player.jet = true;
-                //player.jetKeyDown = true;
-                player.Velocity += player.jetForce;
-            }
+        //    // JET FART
+        //    if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
+        //    {
+        //        player.fuel -= 1;
+        //        //player.jet = true;
+        //        //player.jetKeyDown = true;
+        //        player.Velocity += player.jetForce;
+        //    }
 
-            if (player.Velocity.X > player.maxVelocity.X) player.Velocity.X = player.maxVelocity.X;
-            if (player.Velocity.X < -player.maxVelocity.X) player.Velocity.X = -player.maxVelocity.X;
-            if (player.Velocity.Y < -player.maxVelocity.Y) player.Velocity.Y = -player.maxVelocity.Y;
+        //    if (player.Velocity.X > player.maxVelocity.X) player.Velocity.X = player.maxVelocity.X;
+        //    if (player.Velocity.X < -player.maxVelocity.X) player.Velocity.X = -player.maxVelocity.X;
+        //    if (player.Velocity.Y < -player.maxVelocity.Y) player.Velocity.Y = -player.maxVelocity.Y;
 
-            if (!moveRequest)
-            {
-                if (player.Velocity.X < 0) player.Velocity.X += player.decX;
-                if (player.Velocity.X > 0) player.Velocity.X -= player.decX;
-                // Deceleration may produce a speed that is greater than zero but
-                // smaller than the smallest unit of deceleration. These lines ensure
-                // that the player does not keep travelling at slow speed forever after
-                // decelerating.
-                if (player.Velocity.X > 0 && player.Velocity.X < player.decX) player.Velocity.X = 0;
-                if (player.Velocity.X < 0 && player.Velocity.X > -player.decX) player.Velocity.X = 0;
-            }
+        //    if (!moveRequest)
+        //    {
+        //        if (player.Velocity.X < 0) player.Velocity.X += player.decX;
+        //        if (player.Velocity.X > 0) player.Velocity.X -= player.decX;
+        //        // Deceleration may produce a speed that is greater than zero but
+        //        // smaller than the smallest unit of deceleration. These lines ensure
+        //        // that the player does not keep travelling at slow speed forever after
+        //        // decelerating.
+        //        if (player.Velocity.X > 0 && player.Velocity.X < player.decX) player.Velocity.X = 0;
+        //        if (player.Velocity.X < 0 && player.Velocity.X > -player.decX) player.Velocity.X = 0;
+        //    }
 
-            // GRAVITY //
-            player.Velocity.Y += player.gravityAccel;
+        //    // GRAVITY //
+        //    player.Velocity.Y += player.gravityAccel;
 
-            // UPDATE FUEL HUD
-            player.fuelFill.Width = player.fuel * 2;
+        //    // UPDATE FUEL HUD
+        //    player.fuelFill.Width = player.fuel * 2;
 
 
-            player.UpdateBoundingBoxes();
-        }
+        //    player.UpdateBoundingBoxes();
+        //}
 
         //private void UpdateCollision()
         //{

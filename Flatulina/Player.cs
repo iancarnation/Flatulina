@@ -18,9 +18,9 @@ namespace Flatulina
 
         // Sounds
 
-        public Game Game
+        public Flatulina_Game Game
         { get { return game; } }
-        Game game;
+        Flatulina_Game game;
 
 
         // >>>>>>>>> General Properties <<<<<<<<
@@ -132,7 +132,7 @@ namespace Flatulina
         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-        public void Initialize(Game game, Texture2D a_texture, Vector2 a_position )
+        public void Initialize(Flatulina_Game game, Texture2D a_texture, Vector2 a_position )
         {
             // temp
             color = Color.White;
@@ -214,8 +214,7 @@ namespace Flatulina
         public void Update(
             GameTime gameTime, 
             KeyboardState keyboardState,
-            GamePadState gamePadState,
-            DisplayOrientation orientation) 
+            GamePadState gamePadState) 
         {
             GetInput(keyboardState, gamePadState);
 
@@ -224,6 +223,14 @@ namespace Flatulina
             // check if alive and on ground -> play run/idle animation
 
             // Clear input
+            movement = 0.0f;
+            isJumping = false;
+
+            // these here?
+            // UPDATE FUEL HUD
+            this.fuelFill.Width = this.fuel * 2;
+
+            UpdateBoundingBoxes();
             
         }
 
@@ -327,10 +334,10 @@ namespace Flatulina
                 // Begin or continue a jump
                 if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
                 {
-                    if (jumpTime == 0.0f)
+                    //if (jumpTime == 0.0f)
                         // play jump sound
 
-                        jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
                     // play jump animation
                 }
 
@@ -373,24 +380,24 @@ namespace Flatulina
             CollisionRight.DebugRectColor = Color.Red;
 
             // for each of the collision solids in the environment..
-            for (int i = 0; i < Game.collisionSolids.Count; i++)
+            for (int i = 0; i < game.collisionSolids.Count; i++)
             {
                 //Console.WriteLine("Player" + player.BoundingBox.Position);
                 //Console.WriteLine("Solid" + collisionSolids[i].Position);
 
                 // check to see if player's general bounding box is colliding
-                if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
+                if (this.BoundingBox.Intersects(game.collisionSolids[i].BoundingBox))
                 {
                     Console.WriteLine("Bounding Box Intersection");
-                    player.BoundingBox.DebugRectColor = Color.Yellow;
+                    this.BoundingBox.DebugRectColor = Color.Yellow;
                     hitSomething = true;
 
                     // run the player's collision area checks and adjust position accordingly
-                    player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
+                    this.HandleCollisionWithSolid(game.collisionSolids[i].BoundingBox);
                 }
 
                 if (!hitSomething)
-                    player.BoundingBox.DebugRectColor = Color.Red;
+                    this.BoundingBox.DebugRectColor = Color.Red;
             }
         }
 
@@ -408,9 +415,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Top Hit");
                 CollisionTop.DebugRectColor = Color.Green;
-                Position.Y = solidRect.Position.Y - Height;
-                if (this.Velocity.Y < 0f)
-                    this.Velocity.Y = 0f;
+                position.Y = solidRect.Position.Y - Height;
+                if (this.velocity.Y < 0f)
+                    this.velocity.Y = 0f;
             }
             else
                 CollisionTop.DebugRectColor = Color.Red;
@@ -419,11 +426,11 @@ namespace Flatulina
             {
                 Console.WriteLine("Bottom Hit");
                 CollisionBottom.DebugRectColor = Color.Green;
-                Position.Y = solidRect.Position.Y - this.Height - 1;
-                if (this.Velocity.Y > 0f)
+                position.Y = solidRect.Position.Y - this.Height - 1;
+                if (this.velocity.Y > 0f)
                 {
-                    this.Velocity.Y = 0f;
-                    this.onGround = true;
+                    this.velocity.Y = 0f;
+                    this.isOnGround = true;
                 }
             }
             else
@@ -433,9 +440,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Left Hit");
                 CollisionLeft.DebugRectColor = Color.Green;
-                Position.X = solidRect.Position.X + solidRect.Width;
-                if (this.Velocity.X < 0f)
-                    this.Velocity.X = 0f;
+                position.X = solidRect.Position.X + solidRect.Width;
+                if (this.velocity.X < 0f)
+                    this.velocity.X = 0f;
                 
                
             }
@@ -446,9 +453,9 @@ namespace Flatulina
             {
                 Console.WriteLine("Right Hit");
                 CollisionRight.DebugRectColor = Color.Green;
-                if (this.Velocity.X > 0f)
-                    this.Velocity.X = 0f;
-                Position.X = solidRect.Position.X - Width;
+                if (this.velocity.X > 0f)
+                    this.velocity.X = 0f;
+                position.X = solidRect.Position.X - Width;
             }
             else
                 CollisionRight.DebugRectColor = Color.Red;

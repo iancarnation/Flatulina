@@ -313,6 +313,11 @@ namespace Flatulina
             Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
             _spriteBatch.DrawString(Font1, mouseCoord, fontPosition, Color.White);
 
+            // draw velocity
+            string playerVel = player.Velocity.ToString();
+            Vector2 velFontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 40);
+            _spriteBatch.DrawString(Font1, playerVel, velFontPosition, Color.White);
+
             // Draw Player
             player.Draw(_spriteBatch);
 

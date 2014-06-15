@@ -65,12 +65,12 @@ namespace Flatulina
         private const float MaxFallSpeed = 550.0f;
         private const float JumpControlPower = 0.14f;
 
+        private Vector2 JetFartAcceleration = new Vector2(9000.0f, -10000.0f);
+        private const float MaxJetSpeed = 2000.0f;
+
         // Input configuration
         private const float MoveStickScale = 1.0f;
         private const Buttons JumpButton = Buttons.A;
-
-        //// maximum velocity allowed
-        //public Vector2 maxVelocity;  // might need for tempering jetFart
 
         // >>>>>>>>> Player States <<<<<<<<<<<<<<<<<
 
@@ -89,14 +89,15 @@ namespace Flatulina
         private float movement;
 
         // Jumping State
-
-        // True if currently jumping (prevents double jump)
         private bool isJumping;
         private bool wasJumping;
         private float jumpTime;
 
-        // True if jump key is currently held down
-        public bool jumpKeyDown, jetKeyDown;
+        // Power States
+
+        // Jet Fart
+        private bool isJetFarting;
+
 
         // ------------ Collision Fields ------------------------
 
@@ -115,7 +116,7 @@ namespace Flatulina
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
 
-        public Vector2 jetForce;
+        //public Vector2 jetForce;
 
         public Rectangle fuelOutline, fuelFill; // for drawing fuel meter
 
@@ -225,6 +226,7 @@ namespace Flatulina
             // Clear input
             movement = 0.0f;
             isJumping = false;
+            isJetFarting = false;
 
             // these here?
             // UPDATE FUEL HUD
@@ -264,10 +266,16 @@ namespace Flatulina
 
             // Check if the player wants to jump
             isJumping =
-                /*gamePadState.IsButtonDown(JumpButton) ||*/
+                gamePadState.IsButtonDown(JumpButton) ||
                 keyboardState.IsKeyDown(Keys.Space) ||
                 keyboardState.IsKeyDown(Keys.Up) ||
                 keyboardState.IsKeyDown(Keys.W);
+
+            // Check for jet fart
+            isJetFarting =
+                keyboardState.IsKeyDown(Keys.Z) ||
+                keyboardState.IsKeyDown(Keys.Decimal);
+
            
         }
 
@@ -287,7 +295,17 @@ namespace Flatulina
 
             velocity.Y = DoJump(velocity.Y, gameTime);
 
-            // Apply pswudo-drag horizontally
+            // JET FART
+            if (isJetFarting && this.fuel > 0)
+            {
+                this.fuel -= 1;
+                //player.jet = true;
+                //player.jetKeyDown = true;
+                this.velocity += JetFartAcceleration * elapsed;
+            }
+
+
+            // Apply pseudo-drag horizontally
             if (IsOnGround)
                 velocity.X *= GroundDragFactor;
             else
@@ -295,6 +313,9 @@ namespace Flatulina
 
             // Prevent the player from running faster than this top speed
             velocity.X = MathHelper.Clamp(velocity.X, -MaxMoveSpeed, MaxMoveSpeed);
+            
+            // Prevent player from jetting up faster than this
+            velocity.Y = MathHelper.Clamp(velocity.Y, -MaxJetSpeed, MaxJetSpeed);
 
             // Apply velocity
             Position += velocity * elapsed;
@@ -305,7 +326,7 @@ namespace Flatulina
             // If the collision stopped us from moving, reset velocity to zero
             if (Position.X == previousPosition.X)
                 velocity.X = 0f;
-            if (Position.Y == previousPosition.Y)
+            if (Position.Y == previousPosition.Y && !isJetFarting)
                 velocity.Y = 0f;
         }
 
@@ -319,7 +340,7 @@ namespace Flatulina
         /// over. The jump velocity is controlled by the jumpTime field
         /// which measures time into the accent of the current jump.
         /// </remarks>
-        /// <param name="velocityY">
+        /// <param name="velocityY"> 
         /// The player's current velocity along the Y axis.
         /// </param>
         /// <returns>
@@ -362,6 +383,48 @@ namespace Flatulina
 
             return velocityY;
         }
+
+        //private Vector2 DoJetFart(Vector2 velocity, GameTime gameTime)
+        //{
+        //    // If the player wants to jetFart
+        //    if (isJetFarting)
+        //    {
+        //        if (this.fuel > 0.0)
+        //        {
+        //            velocity += JetFartVelocity;
+        //        }
+        //        //// Begin or continue a jump
+        //        //if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
+        //        //{
+        //        //    //if (jumpTime == 0.0f)
+        //        //    // play jump sound
+
+        //        //    jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        //        //    // play jump animation
+        //        //}
+
+        //        //// If we are in the ascent of the jump
+        //        //if (0.0f < jumpTime && jumpTime <= MaxJumpTime)
+        //        //{
+        //        //    // Fully override the vertical velocity with a power curve that gives players more control over the top of the jump
+        //        //    velocityY = JumpLaunchVelocity * (1.0f - (float)Math.Pow(jumpTime / MaxJumpTime, JumpControlPower));
+        //        //}
+        //        //else
+        //        //{
+        //        //    // Reached the apex of the jump
+        //        //    jumpTime = 0.0f;
+        //        //}
+
+        //    }
+        //    else
+        //    {
+        //        // Continues not jumping or cancels a jump in progress
+        //        jumpTime = 0.0f;
+        //    }
+        //    //wasJumping = isJumping;
+
+        //    return velocity;
+        //}
 
         /// <summary>
         /// Detects and resolves all collisions between the player and his environment

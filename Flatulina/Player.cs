@@ -116,17 +116,12 @@ namespace Flatulina
 
         // vvvvvvvvvvvv Yet to be organized vvvvvvvvvvvvvvvvv
 
-        //public Vector2 jetForce;
-
         public Rectangle fuelOutline, fuelFill; // for drawing fuel meter
 
         public int fuel;
 
         // Amount of hit points 
         public int health;
-
-        // State of the player
-        public bool Active;
 
         // vvvvvvvvvv TRASH vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
        
@@ -190,9 +185,6 @@ namespace Flatulina
 
             // set broad collision area
             BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
-
-            // Set the player to be Active  // ** to be removed **
-            Active = true;
 
             // Set player health
             health = 100;

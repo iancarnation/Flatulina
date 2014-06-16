@@ -120,7 +120,7 @@ namespace Flatulina
             // Initialize the player class
             player = new Player();
             //enemy = new Player();
-            enemy = new Enemy();
+            //enemy = new Enemy();
 
 
             collisionSolids = new List<EnvironmentSolid>();
@@ -131,9 +131,9 @@ namespace Flatulina
             collisionSolids.Add(floor);
             collisionSolids.Add(tower1);
 
-            enemies.Add(enemy);
+            //enemies.Add(enemy);
 
-            enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
+            //enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
 
             
 
@@ -171,7 +171,7 @@ namespace Flatulina
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
             
             // set enemy patrol
-            enemies[0].SetPath(new Vector2(600,570), new Vector2(900,570), new Vector2(700,570));
+            //enemies[0].SetPath(new Vector2(600,570), new Vector2(900,570), new Vector2(700,570));
 
          
 
@@ -185,6 +185,7 @@ namespace Flatulina
             //Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
             //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
+            // SCREEN 1
             screens.Add(new Screen());
 
             screens[0].objs.Add(new EnvironmentSolid());
@@ -192,8 +193,12 @@ namespace Flatulina
             screens[0].objs.Add(new EnvironmentSolid());
             screens[0].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
 
+            screens[0].enemies.Add(new Enemy());
+            screens[0].enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
+            screens[0].enemies[0].SetPath(new Vector2(600, 570), new Vector2(900, 570), new Vector2(700, 570));
 
 
+            // SCREEN 2
             screens.Add(new Screen());
 
             screens[1].objs.Add(new EnvironmentSolid());
@@ -201,8 +206,13 @@ namespace Flatulina
             screens[1].objs.Add(new EnvironmentSolid());
             screens[1].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
 
+            screens[1].enemies.Add(new Enemy());
+            screens[1].enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(600, 450));
+            screens[1].enemies[0].SetPath(new Vector2(600, 570), new Vector2(750, 570), new Vector2(600, 220));
 
-
+            screens[1].enemies.Add(new Enemy());
+            screens[1].enemies[1].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(200, 570));
+            screens[1].enemies[1].SetPath(new Vector2(200, 570), new Vector2(300, 570), new Vector2(800, 570));
 
             Console.WriteLine("Loadeddddd");
 
@@ -242,9 +252,9 @@ namespace Flatulina
             UpdateCollision();
             UpdatePlayer(gameTime);
 
-            for (int i = 0; i < enemies.Count; i++)
+            for (int i = 0; i < screens[currentScreen].enemies.Count; i++)
             {
-                enemies[i].Update(deltaTime);
+                screens[currentScreen].enemies[i].Update(deltaTime);
             }
             
             
@@ -381,10 +391,11 @@ namespace Flatulina
             }
 
             // TEMPORARY /////////////////////////////////////////////
-            if (player.BoundingBox.Intersects(enemies[0].boundingBox))
-            {
-                player.position = new Vector2(9999,9999);
-            }
+            for (int i = 0; i < screens[currentScreen].enemies.Count; i++ )
+                if (player.BoundingBox.Intersects(screens[currentScreen].enemies[i].boundingBox))
+                {
+                    player.position = new Vector2(9999, 9999);
+                }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -417,17 +428,17 @@ namespace Flatulina
                 DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
 
                 // enemy
-                for (int i = 0; i < enemies.Count; i++)
+                for (int i = 0; i < screens[currentScreen].enemies.Count; i++)
                 {
-                    DrawBorder(enemies[i].boundingBox.DebugRect, 2, Color.Red);
+                    DrawBorder(screens[currentScreen].enemies[i].boundingBox.DebugRect, 2, Color.Red);
                 }
                     
             }
 
             //enemy.Draw(_spriteBatch);
-            for (int i = 0; i < enemies.Count; i++)
+            for (int i = 0; i < screens[currentScreen].enemies.Count; i++)
             {
-                enemies[i].Draw(_spriteBatch);
+                screens[currentScreen].enemies[i].Draw(_spriteBatch);
             }
             
 

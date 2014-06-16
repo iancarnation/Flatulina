@@ -3,6 +3,7 @@ using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -17,6 +18,14 @@ namespace Flatulina
         // Animations
 
         // Sounds
+        private SoundEffect jetFart;
+        private SoundEffect squeak;
+
+        SoundEffectInstance jetFartEffect;
+        SoundEffectInstance squeakEffect;
+
+        bool fartSoundPlaying;
+
 
         public Flatulina_Game Game
         { get { return game; } }
@@ -198,6 +207,18 @@ namespace Flatulina
             fuelOutline = new Rectangle(8, 64, 201, 20);
             fuelFill = new Rectangle(9, 64, fuelFill.X + (fuel * 25), 19);
 
+            // sound effects
+            jetFart = game.Content.Load<SoundEffect>("Sound\\Fart");
+            squeak = game.Content.Load<SoundEffect>("Sound\\ShortSqueak");
+
+            //Creating effect Instance
+            jetFartEffect = jetFart.CreateInstance();
+            jetFartEffect.Volume = 0.01f;
+            jetFartEffect.IsLooped = false;
+            //Creating an instance of squeak
+            squeakEffect = squeak.CreateInstance();
+            squeakEffect.Volume = 0.1f;
+            squeakEffect.IsLooped = false;
 
         }
 
@@ -213,9 +234,16 @@ namespace Flatulina
             KeyboardState keyboardState,
             GamePadState gamePadState) 
         {
+            // Sounds
+
+            
+
+
+
             GetInput(keyboardState, gamePadState);
 
             ApplyPhysics(gameTime);
+
 
             // check if alive and on ground -> play run/idle animation
 
@@ -284,6 +312,9 @@ namespace Flatulina
                 keyboardState.IsKeyDown(Keys.Z) ||
                 keyboardState.IsKeyDown(Keys.Decimal);
 
+            if (keyboardState.IsKeyUp(Keys.Z) && isJetFarting)
+                squeakEffect.Play();
+
            
         }
 
@@ -307,9 +338,15 @@ namespace Flatulina
             if (isJetFarting && this.fuel > 0)
             {
                 this.fuel -= 1;
-                //player.jet = true;
-                //player.jetKeyDown = true;
                 this.velocity += JetFartAcceleration * elapsed;
+
+                if (this.jetFartEffect.State != SoundState.Stopped)
+                    this.jetFartEffect.Play();
+                
+                
+
+
+                // squeak at end
             }
 
 
@@ -477,6 +514,15 @@ namespace Flatulina
                 {
                     this.IsAlive = false;
                 }
+
+            // Powerup Collision
+            for (int i = 0; i < game.screens[game.currentScreen].powerups.Count; i++)
+                if (this.BoundingBox.Intersects(game.screens[game.currentScreen].powerups[i].BoundingBox) && game.screens[game.currentScreen].powerups[i].Active)
+                {
+                    this.fuel += 25;
+                    game.screens[game.currentScreen].powerups[i].Active = false;
+                }
+            
         }
 
         public void Draw(SpriteBatch spriteBatch)

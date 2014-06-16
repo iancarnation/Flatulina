@@ -67,8 +67,16 @@
       <Link>Content\Graphics\Courier New.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\FireBall.xnb">
+      <Link>Content\Graphics\FireBall.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\floor.xnb">
       <Link>Content\Graphics\floor.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\powerUp.xnb">
+      <Link>Content\Graphics\powerUp.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tempCherub.xnb">
@@ -77,6 +85,14 @@
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tower.xnb">
       <Link>Content\Graphics\tower.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\Fart.xnb">
+      <Link>Content\Sound\Fart.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\ShortSqueak.xnb">
+      <Link>Content\Sound\ShortSqueak.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

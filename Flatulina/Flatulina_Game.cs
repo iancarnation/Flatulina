@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,13 +31,18 @@ namespace Flatulina
         Player player;
         //Player enemy;
 
+        // Sounds
+        SoundEffect backgroundMusic;
+        bool songStart = false;
+
+
         // Environment stuff
 
         // Screen iterator
         public int currentScreen;
 
         // SCREENS (List)
-        Screen screen;
+        //public Screen screen;
         public List<Screen> screens;
 
         public List<EnvironmentSolid> collisionSolids; // deprecate
@@ -101,7 +107,7 @@ namespace Flatulina
 
             currentScreen = new int();
             currentScreen = 0;
-            screen = new Screen();
+            //screen = new Screen();
             screens = new List<Screen>();
 
             base.Initialize();
@@ -132,7 +138,8 @@ namespace Flatulina
             player.Initialize(this, Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
 
-         
+            // Sound
+            //backgroundMusic = Content.Load<SoundEffect>("Sound\\LuteSong");
 
             // Environment
 
@@ -163,6 +170,9 @@ namespace Flatulina
             screens[0].enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
             screens[0].enemies[0].SetPath(new Vector2(600, 570), new Vector2(900, 570), new Vector2(700, 570));
 
+            //Initialize PowerUps
+            screens[0].powerups.Add(new Powerup(Content.Load<Texture2D>("Graphics\\powerUp"), new Vector2(600, 525), 100, 100, true));
+
 
             // SCREEN 2
             screens.Add(new Screen());
@@ -180,17 +190,19 @@ namespace Flatulina
             screens[1].enemies[1].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(200, 570));
             screens[1].enemies[1].SetPath(new Vector2(200, 570), new Vector2(300, 570), new Vector2(800, 570));
 
+            screens[1].powerups.Add(new Powerup(Content.Load<Texture2D>("Graphics\\powerUp"), new Vector2(400, 525), 100, 100, true));
+
 
 
             // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
             // vvvvvvvvvvvvvvvvv Old vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-            Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
-            floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
+            //Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
+            //floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
 
-            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
-            tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+            //Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
 
             Console.WriteLine("Loadeddddd");
 
@@ -252,6 +264,16 @@ namespace Flatulina
                 screens[currentScreen].enemies[i].Update(deltaTime);
             }
             
+            // Sound
+
+            ////BackGround music//////////SOUNDS BAD RIGHT NOW WILL EDIT
+            //if (!songStart)
+            //{
+            //    SoundEffectInstance backgroundInstance = backgroundMusic.CreateInstance();
+            //    backgroundInstance.IsLooped = true;
+            //    backgroundInstance.Volume = 0.01f;
+            //    backgroundInstance.Play();
+            //}
 
             base.Update(gameTime);
         }
@@ -297,6 +319,11 @@ namespace Flatulina
                 screens[currentScreen].enemies[i].Draw(_spriteBatch);
             }
 
+            // draw powerups
+            for (int i = 0; i < screens[currentScreen].powerups.Count; i++)
+            {
+                screens[currentScreen].powerups[i].Draw(_spriteBatch);
+            }
 
             for (int i = 0; i < screens[currentScreen].objs.Count; i++)
             {

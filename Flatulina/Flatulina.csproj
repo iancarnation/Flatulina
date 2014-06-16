@@ -75,6 +75,14 @@
       <Link>Content\Graphics\floor.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\IntroScreen.xnb">
+      <Link>Content\Graphics\IntroScreen.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\LoseScreen.xnb">
+      <Link>Content\Graphics\LoseScreen.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\powerUp.xnb">
       <Link>Content\Graphics\powerUp.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -85,6 +93,10 @@
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\tower.xnb">
       <Link>Content\Graphics\tower.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\WinScreen.xnb">
+      <Link>Content\Graphics\WinScreen.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Sound\Fart.xnb">

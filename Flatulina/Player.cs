@@ -11,6 +11,7 @@ namespace Flatulina
 {
     class Player
     {
+        public bool playing;
         // temp
         public Color color;
         public float scale;
@@ -314,7 +315,10 @@ namespace Flatulina
 
             if (keyboardState.IsKeyUp(Keys.Z) && isJetFarting)
                 squeakEffect.Play();
-
+            if (keyboardState.IsKeyDown(Keys.Enter))
+            {
+                playing = true;
+            }
            
         }
 
@@ -340,7 +344,7 @@ namespace Flatulina
                 this.fuel -= 1;
                 this.velocity += JetFartAcceleration * elapsed;
 
-                if (this.jetFartEffect.State != SoundState.Stopped)
+                if (this.jetFartEffect.State == SoundState.Stopped)
                     this.jetFartEffect.Play();
                 
                 

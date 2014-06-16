@@ -32,8 +32,8 @@ namespace Flatulina
         //Player enemy;
 
         // Sounds
-        SoundEffect backgroundMusic;
-        bool songStart = false;
+        //SoundEffect backgroundMusic;
+        //bool songStart = false;
 
 
         // Environment stuff
@@ -61,7 +61,11 @@ namespace Flatulina
         // Mouse states used to track mouse button presses
         MouseState currentMouseState;
         MouseState previousMouseState;
-        
+
+
+        public Texture2D introScreen;
+        public Texture2D winScreen;
+        public Texture2D loseScreen;
 
         // A movement speed for the player
         //float playerMoveSpeed;
@@ -102,7 +106,7 @@ namespace Flatulina
             collisionSolids.Add(floor);
             collisionSolids.Add(tower1);
 
-            debugBoxesOn = true;
+            debugBoxesOn = false;
             editorModeOn = false;
 
             currentScreen = new int();
@@ -137,6 +141,12 @@ namespace Flatulina
 
             player.Initialize(this, Content.Load<Texture2D>("Graphics\\tempCherub"), playerPosition);
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
+
+
+            introScreen = Content.Load<Texture2D>("Graphics\\IntroScreen");
+            winScreen = Content.Load<Texture2D>("Graphics\\WinScreen");
+            loseScreen = Content.Load<Texture2D>("Graphics\\LoseScreen");
+
 
             // Sound
             //backgroundMusic = Content.Load<SoundEffect>("Sound\\LuteSong");
@@ -286,15 +296,15 @@ namespace Flatulina
             _spriteBatch.Begin();
 
             // draw mouse coordinates
-            currentMouseState = Mouse.GetState();
-            string mouseCoord = currentMouseState.X.ToString() + "  " + currentMouseState.Y.ToString();
-            Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
-            _spriteBatch.DrawString(Font1, mouseCoord, fontPosition, Color.White);
+            //currentMouseState = Mouse.GetState();
+            //string mouseCoord = currentMouseState.X.ToString() + "  " + currentMouseState.Y.ToString();
+            //Vector2 fontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
+            //_spriteBatch.DrawString(Font1, mouseCoord, fontPosition, Color.White);
 
-            // draw velocity
-            string playerVel = player.Velocity.ToString();
-            Vector2 velFontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 40);
-            _spriteBatch.DrawString(Font1, playerVel, velFontPosition, Color.White);
+            //// draw velocity
+            //string playerVel = player.Velocity.ToString();
+            //Vector2 velFontPosition = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.X + 10, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 40);
+            //_spriteBatch.DrawString(Font1, playerVel, velFontPosition, Color.White);
 
             // Draw Player
             player.Draw(_spriteBatch);
@@ -334,6 +344,20 @@ namespace Flatulina
                     DrawBorder(screens[currentScreen].objs[i].BoundingBox.DebugRect, 2, screens[currentScreen].objs[i].BoundingBox.DebugRectColor);
             }
 
+            // splash screens
+
+            if (!player.playing)
+            {
+                _spriteBatch.Draw(introScreen, new Rectangle(0, 0, 1024, 728), Color.White);
+            }
+            else if (player.Position.X > 900 && currentScreen == 1)
+            {
+                _spriteBatch.Draw(winScreen, new Rectangle(0, 0, 1024, 728), Color.White);
+            }
+            else if (!player.IsAlive)
+            {
+                _spriteBatch.Draw(loseScreen, new Rectangle(0, 0, 1024, 728), Color.White);
+            }
 
             // draw collision volumes being created in editor mode
             if (editorModeOn)

@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="BoundingRect.cs" />
+    <Compile Include="Enemy.cs" />
     <Compile Include="EnvironmentSolid.cs" />
     <Compile Include="Flatulina_Game.cs" />
     <Compile Include="Player.cs" />

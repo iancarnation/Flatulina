@@ -24,14 +24,15 @@ namespace Flatulina
         SpriteFont Font1;
         Texture2D pixel;
 
-        bool debugBoxesOn;
+        bool debugBoxesOn, editorModeOn;
 
         // Represents player
         Player player;
         //Player enemy;
 
         // Environment stuff
-        public List<EnvironmentSolid> collisionSolids;
+        public List<EnvironmentSolid> collisionSolids; // deprecate
+        public List<BoundingRect> collisionAreas;
         EnvironmentSolid floor;
         EnvironmentSolid tower1;
 
@@ -87,6 +88,7 @@ namespace Flatulina
             collisionSolids.Add(tower1);
 
             debugBoxesOn = true;
+            editorModeOn = false;
 
             base.Initialize();
         }
@@ -161,9 +163,18 @@ namespace Flatulina
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
-            if (currentKeyboardState.IsKeyDown(Keys.B))
+            previousMouseState = currentMouseState;
+            currentMouseState = Mouse.GetState();
+
+            if (currentKeyboardState.IsKeyDown(Keys.B) && previousKeyboardState.IsKeyUp(Keys.B))
             {
                 debugBoxesOn = !debugBoxesOn;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.L) && previousKeyboardState.IsKeyUp(Keys.L))
+            {
+                editorModeOn = !editorModeOn;
+                MakeCollisionAreas(previousMouseState, currentMouseState);
             }
 
             base.Update(gameTime);
@@ -335,6 +346,14 @@ namespace Flatulina
                 DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
             }
 
+            // draw collision volumes being created in editor mode
+            if (editorModeOn)
+            {
+                
+
+                // for each CA, draw a border for it
+            }
+
             //enemy.Draw(_spriteBatch);
 
             for (int i = 0; i < collisionSolids.Count; i++)
@@ -380,5 +399,49 @@ namespace Flatulina
                                             rectangleToDraw.Width,
                                             thicknessOfBorder), borderColor);
         }
+
+        #region Level Creation
+
+        public Rectangle drawArea;
+        public int minX, minY, maxX, maxY, w, h;
+
+        public void MakeCollisionAreas(MouseState previousMouse, MouseState currentMouse)
+        {
+            
+
+            // if left mouse button has just been pressed
+            if (currentMouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton == ButtonState.Released)
+            {
+                // store location for min coordinate
+                minX = currentMouse.X;
+                minY = currentMouse.Y;
+
+                // Initialize rectangle preview drawing position at pointer
+                drawArea = new Rectangle(minX, minY, 0, 0);
+            }
+            // if left mouse has been released
+            if (currentMouse.LeftButton == ButtonState.Released)
+            {
+                // store mouse location for dimension calculation
+                maxX = currentMouse.X;
+                maxY = currentMouse.Y;
+                w = maxX - minX;
+                h = maxY - minY;
+
+                // make a Bounding Rectangle and store it in the list
+                BoundingRect newArea = new BoundingRect(minX, minY, w, h);
+                collisionAreas.Add(newArea);
+
+                // reset drawArea
+                drawArea = new Rectangle(-1, -1, 0, 0);
+            }
+
+
+        }
+
+
+
+        #endregion
+
     }
 }

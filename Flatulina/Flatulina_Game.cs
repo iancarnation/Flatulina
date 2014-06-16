@@ -33,14 +33,14 @@ namespace Flatulina
         bool isSoundPlaying = false;
 
         //PowerUp Vars
-        Powerup powerUp; 
-        
+        Powerup powerUp;
+        Powerup powerUp2;
+        Powerup powerUpFireFart;
 
         SpriteFont Font1;
         Texture2D pixel;
 
         bool debugBoxesOn;
-        bool FuckingSync;
 
         // Represents player
         Player player;
@@ -94,8 +94,7 @@ namespace Flatulina
             // Initialize the player class
             player = new Player();
             //enemy = new Player();
-            //PowerUp
-            powerUp = new Powerup(); 
+            
 
             collisionSolids = new List<EnvironmentSolid>();
             floor = new EnvironmentSolid();
@@ -139,9 +138,11 @@ namespace Flatulina
             //enemy.Initialize(Content.Load<Texture2D>("Graphics\\cherub-flying-arms"), enemyPosition);
             
             //Initialize PowerUps
-            powerUp.position = new Vector2(200, -200);
-            powerUp.tex = Content.Load<Texture2D>("Graphics\\powerUp"); 
+            powerUp = new Powerup(Content.Load<Texture2D>("Graphics\\powerUp"), new Vector2(600, 525), 100, 100, true);
            
+            //FireFartPowerUp
+            powerUp2 = new Powerup(Content.Load<Texture2D>("Graphics\\powerUp"), new Vector2(300, 525), 100, 100, true);
+            powerUp2.color = Color.Red; 
 
             // Environment
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
@@ -316,6 +317,12 @@ namespace Flatulina
             player.CollisionLeft.DebugRectColor = Color.Red;
             player.CollisionRight.DebugRectColor = Color.Red;
 
+            powerUp.CollisionTop.DebugRectColor = Color.Red;
+            powerUp.CollisionBottom.DebugRectColor = Color.Red;
+            powerUp.CollisionLeft.DebugRectColor = Color.Red;
+            powerUp.CollisionRight.DebugRectColor = Color.Red; 
+
+
             // for each of the collision solids in the environment..
             for (int i = 0; i < collisionSolids.Count; i++)
             {
@@ -332,9 +339,34 @@ namespace Flatulina
                     // run the player's collision area checks and adjust position accordingly
                     player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
                 }
+    
                 
                 if (!hitSomething)    
                     player.BoundingBox.DebugRectColor = Color.Red;
+            }
+            if (player.BoundingBox.Intersects(powerUp.BoundingBox))
+            {
+                Console.WriteLine("YOU HIT SOMESHIT!");
+                if (powerUp.Active && hitSomething == true)
+                {
+                    player.fuel += 25;
+                    powerUp.Active = false;
+                }
+                player.BoundingBox.Intersects(powerUp.BoundingBox);
+
+
+            }
+            if (player.BoundingBox.Intersects(powerUp2.BoundingBox))
+            {
+                if (powerUp2.Active && hitSomething == true)
+                {
+                    Console.WriteLine("YOUS A MOTHAFUCKING G NIGGA");
+                    //draw a fire fart at the players butt
+                    powerUpFireFart = new Powerup(Content.Load<Texture2D>("Graphics\\FireBall"), player.position, 100, 100, true); 
+                    //want to give it a velocity int he direction the butt is facing. 
+                    powerUp2.Active = false; 
+                }
+                player.BoundingBox.Intersects(powerUp2.BoundingBox);
             }
         }
 
@@ -355,7 +387,12 @@ namespace Flatulina
             player.Draw(_spriteBatch);
 
             //powerUp Draw
-            powerUp.Draw(_spriteBatch); 
+            powerUp.Draw(_spriteBatch);
+            powerUp2.Draw(_spriteBatch);
+            if (powerUpFireFart != null)
+            {
+                powerUpFireFart.Draw(_spriteBatch);
+            }
 
             // HUD
             _spriteBatch.Draw(pixel, player.fuelFill, Color.Red);

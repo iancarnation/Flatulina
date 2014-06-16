@@ -65,6 +65,10 @@
       <Link>Content\Graphics\Courier New.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\FireBall.xnb">
+      <Link>Content\Graphics\FireBall.xnb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\FlatulinaContent\FlatulinaContent\bin\PSM\Content\Graphics\floor.xnb">
       <Link>Content\Graphics\floor.xnb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -31,6 +31,14 @@ namespace Flatulina
         //Player enemy;
 
         // Environment stuff
+
+        // Screen iterator
+        public int currentScreen;
+
+        // SCREENS (List)
+        Screen screen;
+        public List<Screen> screens;
+
         public List<EnvironmentSolid> collisionSolids; // deprecate
         public List<BoundingRect> collisionAreas;
         EnvironmentSolid floor;
@@ -91,6 +99,11 @@ namespace Flatulina
             debugBoxesOn = true;
             editorModeOn = false;
 
+            currentScreen = new int();
+            currentScreen = 0;
+            screen = new Screen();
+            screens = new List<Screen>();
+
             base.Initialize();
         }
 
@@ -122,6 +135,57 @@ namespace Flatulina
          
 
             // Environment
+
+            // vvvvvvvvvvvvvvv New vvvvvvvvvvvvvvvvvvv
+
+            // SCREEN 1
+
+            // add new screen to screen list
+            //screens.Add(new Screen());
+
+            // load collision area list
+
+            // 
+
+            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+            // vvvvvvvvvvvvvv Original Caleb Implementation vvvvvvvvvvvvvvvvvvvv
+
+            // SCREEN 1
+            screens.Add(new Screen());
+
+            screens[0].objs.Add(new EnvironmentSolid());
+            screens[0].objs[0].Initialize(Content.Load<Texture2D>("Graphics\\tower"), new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450));
+            screens[0].objs.Add(new EnvironmentSolid());
+            screens[0].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
+
+            screens[0].enemies.Add(new Enemy());
+            screens[0].enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
+            screens[0].enemies[0].SetPath(new Vector2(600, 570), new Vector2(900, 570), new Vector2(700, 570));
+
+
+            // SCREEN 2
+            screens.Add(new Screen());
+
+            screens[1].objs.Add(new EnvironmentSolid());
+            screens[1].objs[0].Initialize(Content.Load<Texture2D>("Graphics\\tower"), new Vector2(600, GraphicsDevice.Viewport.TitleSafeArea.Height - 450));
+            screens[1].objs.Add(new EnvironmentSolid());
+            screens[1].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
+
+            screens[1].enemies.Add(new Enemy());
+            screens[1].enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(600, 450));
+            screens[1].enemies[0].SetPath(new Vector2(600, 570), new Vector2(750, 570), new Vector2(600, 220));
+
+            screens[1].enemies.Add(new Enemy());
+            screens[1].enemies[1].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(200, 570));
+            screens[1].enemies[1].SetPath(new Vector2(200, 570), new Vector2(300, 570), new Vector2(800, 570));
+
+
+
+            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+            // vvvvvvvvvvvvvvvvv Old vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
             Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
             floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
 
@@ -180,6 +244,15 @@ namespace Flatulina
             if (editorModeOn)
                 MakeCollisionAreas();
 
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // update enemies
+            for (int i = 0; i < screens[currentScreen].enemies.Count; i++)
+            {
+                screens[currentScreen].enemies[i].Update(deltaTime);
+            }
+            
+
             base.Update(gameTime);
         }
 
@@ -218,27 +291,30 @@ namespace Flatulina
                 DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
             }
 
-            for (int i = 0; i < collisionSolids.Count; i++)
+            //enemy.Draw(_spriteBatch);
+            for (int i = 0; i < screens[currentScreen].enemies.Count; i++)
             {
-                collisionSolids[i].Draw(_spriteBatch);
+                screens[currentScreen].enemies[i].Draw(_spriteBatch);
+            }
+
+
+            for (int i = 0; i < screens[currentScreen].objs.Count; i++)
+            {
+                screens[currentScreen].objs[i].Draw(_spriteBatch);
 
                 // draw debug rectangles
                 if (debugBoxesOn)
-                    DrawBorder(collisionSolids[i].BoundingBox.DebugRect, 2, collisionSolids[i].BoundingBox.DebugRectColor);
+                    DrawBorder(screens[currentScreen].objs[i].BoundingBox.DebugRect, 2, screens[currentScreen].objs[i].BoundingBox.DebugRectColor);
             }
+
 
             // draw collision volumes being created in editor mode
             if (editorModeOn)
             {
                 // toggle 'editor' notification on screen
                 string e = "Editor Mode On";
-                Vector2 ePos = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.Width - 80, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
+                Vector2 ePos = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.Width - 200, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
                 _spriteBatch.DrawString(Font1, e, ePos, Color.White);
-
-                // draw mouse state
-                // Vector2 mouseStatePos = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.Width - 800, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 40);
-                //_spriteBatch.DrawString(Font1, currentMouseState.LeftButton.ToString(), mouseStatePos, Color.White);
-                Console.WriteLine(currentMouseState.LeftButton);
 
                 // draw the rectangle area being defined by mouse drag
                 DrawBorder(drawArea, 1, Color.Orange);

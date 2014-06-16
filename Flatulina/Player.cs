@@ -74,6 +74,8 @@ namespace Flatulina
 
         // >>>>>>>>> Player States <<<<<<<<<<<<<<<<<
 
+        public bool IsAlive;
+
         /// <summary>
         /// Gets whether or not the player's feet are on the ground.
         /// </summary>
@@ -134,6 +136,8 @@ namespace Flatulina
             color = Color.White;
             scale = 0.4f;
 
+            IsAlive = true;
+
             this.game = game;
 
             // set texture // ** to be animation later **
@@ -187,7 +191,7 @@ namespace Flatulina
             BoundingBox = new BoundingRect(a_position.X, CollisionTop.Position.Y, this.Width, this.Height + 10f);
 
             // Set player health
-            health = 100;
+            //health = 100;
 
             fuel = 100;
 
@@ -225,6 +229,18 @@ namespace Flatulina
             this.fuelFill.Width = this.fuel * 2;
 
             UpdateBoundingBoxes();
+
+            // initial screen switching logic
+            if (this.position.X > game.GraphicsDevice.Viewport.Width - this.halfOfWidth && game.currentScreen < game.screens.Count - 1)
+            {
+                this.position.X = this.halfOfWidth;
+                game.currentScreen++;
+            }
+            else if (this.position.X < 0 - this.halfOfWidth && game.currentScreen > 0)
+            {
+                this.position.X = game.GraphicsDevice.Viewport.Width - this.halfOfWidth;
+                game.currentScreen--;
+            }
             
         }
 
@@ -435,25 +451,32 @@ namespace Flatulina
             CollisionRight.DebugRectColor = Color.Red;
 
             // for each of the collision solids in the environment..
-            for (int i = 0; i < game.collisionSolids.Count; i++)
+            for (int i = 0; i < game.screens[game.currentScreen].objs.Count; i++)
             {
                 //Console.WriteLine("Player" + player.BoundingBox.Position);
                 //Console.WriteLine("Solid" + collisionSolids[i].Position);
 
                 // check to see if player's general bounding box is colliding
-                if (this.BoundingBox.Intersects(game.collisionSolids[i].BoundingBox))
+                if (this.BoundingBox.Intersects(game.screens[game.currentScreen].objs[i].BoundingBox))
                 {
                     Console.WriteLine("Bounding Box Intersection");
                     this.BoundingBox.DebugRectColor = Color.Yellow;
                     hitSomething = true;
 
                     // run the player's collision area checks and adjust position accordingly
-                    this.HandleCollisionWithSolid(game.collisionSolids[i].BoundingBox);
+                    this.HandleCollisionWithSolid(game.screens[game.currentScreen].objs[i].BoundingBox);
                 }
 
                 if (!hitSomething)
                     this.BoundingBox.DebugRectColor = Color.Red;
             }
+
+            // TEMPORARY Enemy Collision /////////////////////////////////////////////
+            for (int i = 0; i < game.screens[game.currentScreen].enemies.Count; i++)
+                if (this.BoundingBox.Intersects(game.screens[game.currentScreen].enemies[i].boundingBox))
+                {
+                    this.IsAlive = false;
+                }
         }
 
         public void Draw(SpriteBatch spriteBatch)

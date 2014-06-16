@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Flatulina
 {
-    class Enemy
+    public class Enemy
     {
         // direction
         public enum Direction { LEFT = -1, RIGHT = 1 }

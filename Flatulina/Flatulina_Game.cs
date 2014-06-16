@@ -80,7 +80,8 @@ namespace Flatulina
             //enemy = new Player();
 
 
-            collisionSolids = new List<EnvironmentSolid>();
+            collisionSolids = new List<EnvironmentSolid>(); // deprecate
+            collisionAreas = new List<BoundingRect>();
             floor = new EnvironmentSolid();
             tower1 = new EnvironmentSolid();
 
@@ -174,142 +175,13 @@ namespace Flatulina
             if (currentKeyboardState.IsKeyDown(Keys.L) && previousKeyboardState.IsKeyUp(Keys.L))
             {
                 editorModeOn = !editorModeOn;
-                MakeCollisionAreas(previousMouseState, currentMouseState);
             }
 
+            if (editorModeOn)
+                MakeCollisionAreas();
+
             base.Update(gameTime);
-
-            // vvvvvvvvvvvv Original vvvvvvvvvvvvvvvvvv
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //    Exit();
-
-            //// Save the previous state of the keyboard and game pad so we can determine single key/button presses
-            //previousGamePadState = currentGamePadState;
-            //previousKeyboardState = currentKeyboardState;
-
-            //// Read the current state of the keyboard and gamepad and store it
-            //currentKeyboardState = Keyboard.GetState();
-            //currentGamePadState = GamePad.GetState(PlayerIndex.One);
-
-            
-            //UpdateCollision();
-            //UpdatePlayer(gameTime);
-
-            // debug options
-            // toggle bounding boxes
-            //if (currentKeyboardState.IsKeyDown(Keys.B))
-            //{
-            //    debugBoxesOn = !debugBoxesOn;
-            //}
-            
-            //base.Update(gameTime);
         }
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        /// 
-
-        //private void UpdatePlayer(GameTime gameTime)
-        //{
-        //    float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        //    bool moveRequest = false;
-
-        //    // Get Thumbstick Controls
-        //    player.Position += player.Velocity * deltaTime;                     
-
-        //    // Use the keyboard / dpad
-        //    if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A) || currentGamePadState.DPad.Left == ButtonState.Pressed)
-        //    {
-        //        player.Velocity.X -= player.accX;
-        //        moveRequest = true;
-        //    }
-
-        //    if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D) || currentGamePadState.DPad.Right == ButtonState.Pressed)
-        //    {
-        //        player.Velocity.X += player.accX;
-        //        moveRequest = true;
-        //    }
-
-        //    // JUMPING
-        //    if (currentKeyboardState.IsKeyDown(Keys.Space) && player.onGround /*&& !player.jumping*/ && !player.jumpKeyDown)
-        //    {
-        //        player.jumping = true;
-        //        player.jumpKeyDown = true;
-        //        player.Velocity.Y = -player.jumpVelocityY;
-        //    }
-        //    // jump key released
-        //    if (!currentKeyboardState.IsKeyDown(Keys.Space))
-        //    {
-        //        player.jumpKeyDown = false;
-        //    }
-
-        //    // JET FART
-        //    if (currentKeyboardState.IsKeyDown(Keys.Z) /*&& !player.jet && !player.jetKeyDown*/ && player.fuel > 0)
-        //    {
-        //        player.fuel -= 1;
-        //        //player.jet = true;
-        //        //player.jetKeyDown = true;
-        //        player.Velocity += player.jetForce;
-        //    }
-
-        //    if (player.Velocity.X > player.maxVelocity.X) player.Velocity.X = player.maxVelocity.X;
-        //    if (player.Velocity.X < -player.maxVelocity.X) player.Velocity.X = -player.maxVelocity.X;
-        //    if (player.Velocity.Y < -player.maxVelocity.Y) player.Velocity.Y = -player.maxVelocity.Y;
-
-        //    if (!moveRequest)
-        //    {
-        //        if (player.Velocity.X < 0) player.Velocity.X += player.decX;
-        //        if (player.Velocity.X > 0) player.Velocity.X -= player.decX;
-        //        // Deceleration may produce a speed that is greater than zero but
-        //        // smaller than the smallest unit of deceleration. These lines ensure
-        //        // that the player does not keep travelling at slow speed forever after
-        //        // decelerating.
-        //        if (player.Velocity.X > 0 && player.Velocity.X < player.decX) player.Velocity.X = 0;
-        //        if (player.Velocity.X < 0 && player.Velocity.X > -player.decX) player.Velocity.X = 0;
-        //    }
-
-        //    // GRAVITY //
-        //    player.Velocity.Y += player.gravityAccel;
-
-        //    // UPDATE FUEL HUD
-        //    player.fuelFill.Width = player.fuel * 2;
-
-
-        //    player.UpdateBoundingBoxes();
-        //}
-
-        //private void UpdateCollision()
-        //{
-        //    bool hitSomething = false;
-
-        //    player.CollisionTop.DebugRectColor = Color.Red;
-        //    player.CollisionBottom.DebugRectColor = Color.Red;
-        //    player.CollisionLeft.DebugRectColor = Color.Red;
-        //    player.CollisionRight.DebugRectColor = Color.Red;
-
-        //    // for each of the collision solids in the environment..
-        //    for (int i = 0; i < collisionSolids.Count; i++)
-        //    {
-        //        //Console.WriteLine("Player" + player.BoundingBox.Position);
-        //        //Console.WriteLine("Solid" + collisionSolids[i].Position);
-
-        //        // check to see if player's general bounding box is colliding
-        //        if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
-        //        {
-        //            Console.WriteLine("Bounding Box Intersection");
-        //            player.BoundingBox.DebugRectColor = Color.Yellow;
-        //            hitSomething = true;
-
-        //            // run the player's collision area checks and adjust position accordingly
-        //            player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
-        //        }
-                
-        //        if (!hitSomething)    
-        //            player.BoundingBox.DebugRectColor = Color.Red;
-        //    }
-        //}
 
         protected override void Draw(GameTime gameTime)
         {
@@ -346,16 +218,6 @@ namespace Flatulina
                 DrawBorder(player.CollisionRight.DebugRect, 1, player.CollisionRight.DebugRectColor);
             }
 
-            // draw collision volumes being created in editor mode
-            if (editorModeOn)
-            {
-                
-
-                // for each CA, draw a border for it
-            }
-
-            //enemy.Draw(_spriteBatch);
-
             for (int i = 0; i < collisionSolids.Count; i++)
             {
                 collisionSolids[i].Draw(_spriteBatch);
@@ -365,10 +227,33 @@ namespace Flatulina
                     DrawBorder(collisionSolids[i].BoundingBox.DebugRect, 2, collisionSolids[i].BoundingBox.DebugRectColor);
             }
 
-            //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
+            // draw collision volumes being created in editor mode
+            if (editorModeOn)
+            {
+                // toggle 'editor' notification on screen
+                string e = "Editor Mode On";
+                Vector2 ePos = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.Width - 80, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 10);
+                _spriteBatch.DrawString(Font1, e, ePos, Color.White);
+
+                // draw mouse state
+                // Vector2 mouseStatePos = new Vector2(graphics.GraphicsDevice.Viewport.TitleSafeArea.Width - 800, graphics.GraphicsDevice.Viewport.TitleSafeArea.Y + 40);
+                //_spriteBatch.DrawString(Font1, currentMouseState.LeftButton.ToString(), mouseStatePos, Color.White);
+                Console.WriteLine(currentMouseState.LeftButton);
+
+                // draw the rectangle area being defined by mouse drag
+                DrawBorder(drawArea, 1, Color.Orange);
+
+                // for each CA, draw a border for it
+                for (int i = 0; i < collisionAreas.Count; i++)
+                {
+                    // draw debug rectangles
+                    if (debugBoxesOn)
+                        DrawBorder(collisionAreas[i].DebugRect, 2, collisionAreas[i].DebugRectColor);
+                }
+            }
 
             _spriteBatch.End();
-
+       
             base.Draw(gameTime);
         }
 
@@ -405,26 +290,32 @@ namespace Flatulina
         public Rectangle drawArea;
         public int minX, minY, maxX, maxY, w, h;
 
-        public void MakeCollisionAreas(MouseState previousMouse, MouseState currentMouse)
+        public void MakeCollisionAreas()
         {
-            
-
             // if left mouse button has just been pressed
-            if (currentMouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton == ButtonState.Released)
+            if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
             {
                 // store location for min coordinate
-                minX = currentMouse.X;
-                minY = currentMouse.Y;
+                minX = currentMouseState.X;
+                minY = currentMouseState.Y;
 
                 // Initialize rectangle preview drawing position at pointer
                 drawArea = new Rectangle(minX, minY, 0, 0);
             }
-            // if left mouse has been released
-            if (currentMouse.LeftButton == ButtonState.Released)
+
+            // if left button is still held down
+            if (currentMouseState.LeftButton == ButtonState.Pressed)
             {
-                // store mouse location for dimension calculation
-                maxX = currentMouse.X;
-                maxY = currentMouse.Y;
+                // modify size of the rectangle with current mouse values
+                drawArea = new Rectangle(drawArea.X, drawArea.Y, currentMouseState.X - drawArea.X, currentMouseState.Y - drawArea.Y);
+            }
+
+            // if left mouse has been released
+            if (currentMouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed)
+            {
+                // store mouse location for dimension calculation // ** maybe change to just use drawArea?
+                maxX = currentMouseState.X;
+                maxY = currentMouseState.Y;
                 w = maxX - minX;
                 h = maxY - minY;
 
@@ -435,8 +326,6 @@ namespace Flatulina
                 // reset drawArea
                 drawArea = new Rectangle(-1, -1, 0, 0);
             }
-
-
         }
 
 

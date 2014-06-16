@@ -40,6 +40,7 @@ namespace Flatulina
         Texture2D pixel;
 
         bool debugBoxesOn;
+        bool FuckingSync;
 
         // Represents player
         Player player;

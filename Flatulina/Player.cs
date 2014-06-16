@@ -81,6 +81,7 @@ namespace Flatulina
         // Input configuration
         private const float MoveStickScale = 1.0f;
         private const Buttons JumpButton = Buttons.A;
+        private const Buttons JetButton = Buttons.X;
 
         // >>>>>>>>> Player States <<<<<<<<<<<<<<<<<
 
@@ -310,6 +311,7 @@ namespace Flatulina
 
             // Check for jet fart
             isJetFarting =
+                gamePadState.IsButtonDown(JetButton) ||
                 keyboardState.IsKeyDown(Keys.Z) ||
                 keyboardState.IsKeyDown(Keys.Decimal);
 

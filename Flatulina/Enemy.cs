@@ -74,9 +74,9 @@ namespace Flatulina
             if (behaviour == Behaviour.PATH)
             {
                 if (position.X < min.X)
-                    dir = Direction.RIGHT;
-                else if (position.X > max.X)
+                    dir = Direction.RIGHT; else if (position.X > max.X)
                     dir = Direction.LEFT;
+               
             }
         }
 

@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Flatulina
 {
-    class EnvironmentSolid
+    public class EnvironmentSolid
     {
         public Texture2D EnvTexture;
 
@@ -32,6 +32,8 @@ namespace Flatulina
             get { return EnvTexture.Height; }
         }
 
+
+        public EnvironmentSolid() { }
         public void Initialize(Texture2D a_texture, Vector2 a_position)
         {
             EnvTexture = a_texture;

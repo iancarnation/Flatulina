@@ -1,4 +1,5 @@
 ﻿#region Using Statements
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -16,8 +17,11 @@ namespace Flatulina
     /// <summary>
     /// This is the main type for your game
     /// </summary>
+    
     public class Flatulina_Game : Game
     {
+
+
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
 
@@ -32,6 +36,16 @@ namespace Flatulina
         Enemy enemy;
 
         // Environment stuff
+
+        // Screen iterator
+        public int currentScreen;
+
+        // SCREENS (List)
+        Screen screen;
+        List<Screen> screens;
+        
+
+
         List<EnvironmentSolid> collisionSolids;
         List<Enemy> enemies;
         EnvironmentSolid floor;
@@ -53,7 +67,29 @@ namespace Flatulina
         // A movement speed for the player
         float playerMoveSpeed;
 
-        //private Texture2D flatulina;
+
+
+
+       /*public void InitializeScreens()
+        {
+
+            Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
+            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+
+            // LOAD SCENE 1
+            screen.objs.Add(floor);
+            floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
+
+            //Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
+            //floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
+
+            //Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+
+            
+        }*/
+
+
 
         public Flatulina_Game()
             : base()
@@ -73,6 +109,11 @@ namespace Flatulina
         /// </summary>
         protected override void Initialize()
         {
+
+            currentScreen = new int();
+            currentScreen = 0;
+            screen = new Screen();
+            screens = new List<Screen>();
             // TODO: Add your initialization logic here
             this.IsMouseVisible = true;
 
@@ -91,11 +132,13 @@ namespace Flatulina
             collisionSolids.Add(tower1);
 
             enemies.Add(enemy);
-            enemies.Add(enemy);
 
             enemies[0].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(700, 570));
-            enemies[1].Initialize(Content.Load<Texture2D>("Graphics\\tempCherub"), new Vector2(200, 0));
 
+            
+
+            // INITIALIZE SCENES //
+            //scenes.Add(scene);
 
             debugBoxesOn = true;
 
@@ -133,15 +176,38 @@ namespace Flatulina
          
 
             // Environment
-            Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
-            floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
 
-            Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
-            tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+
+            // SCREEN 1 INIT /////////////////////////////////////////////////////////////////////////
+            //Vector2 floorPosition = new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100);
+            //floor.Initialize(Content.Load<Texture2D>("Graphics\\floor"), floorPosition);
+
+            //Vector2 tower1Position = new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450);
+            //tower1.Initialize(Content.Load<Texture2D>("Graphics\\tower"), tower1Position);
+
+            screens.Add(new Screen());
+
+            screens[0].objs.Add(new EnvironmentSolid());
+            screens[0].objs[0].Initialize(Content.Load<Texture2D>("Graphics\\tower"), new Vector2(400, GraphicsDevice.Viewport.TitleSafeArea.Height - 450));
+            screens[0].objs.Add(new EnvironmentSolid());
+            screens[0].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
+
+
+
+            screens.Add(new Screen());
+
+            screens[1].objs.Add(new EnvironmentSolid());
+            screens[1].objs[0].Initialize(Content.Load<Texture2D>("Graphics\\tower"), new Vector2(600, GraphicsDevice.Viewport.TitleSafeArea.Height - 450));
+            screens[1].objs.Add(new EnvironmentSolid());
+            screens[1].objs[1].Initialize(Content.Load<Texture2D>("Graphics\\floor"), new Vector2(0, GraphicsDevice.Viewport.TitleSafeArea.Height - 100));
+
+
+
 
             Console.WriteLine("Loadeddddd");
 
             //flatulina = Content.Load<Texture2D>("Player/cherub-flying-arms");
+
         }
 
         /// <summary>
@@ -259,6 +325,21 @@ namespace Flatulina
                 if (player.velocity.X < 0 && player.velocity.X > -player.decX) player.velocity.X = 0;
             }
 
+
+            if (player.position.X > GraphicsDevice.Viewport.Width-player.halfOfWidth && currentScreen < screens.Count-1)
+            {
+                player.position.X = player.halfOfWidth;
+                currentScreen++;
+            }
+            else if (player.position.X < 0 - player.halfOfWidth && currentScreen > 0)
+            {
+                player.position.X = GraphicsDevice.Viewport.Width - player.halfOfWidth;
+                currentScreen--;
+            }
+            else 
+            {
+
+            }
             // GRAVITY //
             player.velocity.Y += player.gravityAccel;
 
@@ -279,20 +360,20 @@ namespace Flatulina
             player.CollisionRight.DebugRectColor = Color.Red;
 
             // for each of the collision solids in the environment..
-            for (int i = 0; i < collisionSolids.Count; i++)
+            for (int i = 0; i < screens[currentScreen].objs.Count; i++)
             {
                 //Console.WriteLine("Player" + player.BoundingBox.Position);
                 //Console.WriteLine("Solid" + collisionSolids[i].Position);
 
                 // check to see if player's general bounding box is colliding
-                if (player.BoundingBox.Intersects(collisionSolids[i].BoundingBox))
+                if (player.BoundingBox.Intersects(screens[currentScreen].objs[i].BoundingBox))
                 {
                     Console.WriteLine("Bounding Box Intersection");
                     player.BoundingBox.DebugRectColor = Color.Yellow;
                     hitSomething = true;
 
                     // run the player's collision area checks and adjust position accordingly
-                    player.HandleCollisionWithSolid(collisionSolids[i].BoundingBox);
+                    player.HandleCollisionWithSolid(screens[currentScreen].objs[i].BoundingBox);
                 }
                 
                 if (!hitSomething)    
@@ -350,13 +431,13 @@ namespace Flatulina
             }
             
 
-            for (int i = 0; i < collisionSolids.Count; i++)
+            for (int i = 0; i < screens[currentScreen].objs.Count; i++)
             {
-                collisionSolids[i].Draw(_spriteBatch);
+               screens[currentScreen].objs[i].Draw(_spriteBatch);
 
                 // draw debug rectangles
                 if (debugBoxesOn)
-                    DrawBorder(collisionSolids[i].BoundingBox.DebugRect, 2, collisionSolids[i].BoundingBox.DebugRectColor);
+                    DrawBorder(screens[currentScreen].objs[i].BoundingBox.DebugRect, 2, screens[currentScreen].objs[i].BoundingBox.DebugRectColor);
             }
 
             //_spriteBatch.Draw(flatulina, new Rectangle(50, 50, 400, 353), Color.White);
